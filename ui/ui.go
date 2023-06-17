@@ -39,8 +39,16 @@ func (ui *UI) Update() error {
 
 	if ui.operation == nil {
 		if MouseJustPressed(ebiten.MouseButtonRight) {
-			log.Println("NewMenu(MousePos())")
+			ui.operation = MainMenu()
 		}
+	}
+	switch op := ui.operation.(type) {
+	case *Menu:
+		if o, done := op.Update(); done {
+			ui.operation = o
+		}
+	default:
+		log.Printf("operation: %v %T", op, op)
 	}
 
 	ui.Canvas.DrawSprites()
@@ -57,6 +65,11 @@ func (ui *UI) Draw(screen *ebiten.Image) {
 	screen.Fill(color.White)
 
 	screen.DrawImage(ui.Canvas.Image(), nil)
+
+	switch op := ui.operation.(type) {
+	case Drawable:
+		op.Draw(screen)
+	}
 
 	msg := fmt.Sprintf("%0.f", ebiten.ActualFPS())
 	ebitenutil.DebugPrint(screen, msg)

@@ -45,3 +45,5 @@ func DrawImage(dst, src *ebiten.Image, pos image.Point, alpha float64) {
 	col.Scale(1, 1, 1, alpha)
 	colorm.DrawImage(dst, src, col, opts)
 }
+
+// outline
