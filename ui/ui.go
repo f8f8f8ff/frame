@@ -4,6 +4,9 @@ import (
 	"fmt"
 	"frame/canvas"
 	"image"
+	"image/color"
+	_ "image/jpeg"
+	_ "image/png"
 	"io/fs"
 	"log"
 	"sync"
@@ -30,7 +33,12 @@ func NewUI(w, h int) *UI {
 
 // updates on ticks
 func (ui *UI) Update() error {
-	return ui.handleDroppedFiles()
+	err := ui.handleDroppedFiles()
+	if err != nil {
+		return err
+	}
+	ui.Canvas.DrawSprites()
+	return nil
 }
 
 func (ui *UI) Layout(outsideWidth, outsideHeight int) (int, int) {
@@ -39,7 +47,7 @@ func (ui *UI) Layout(outsideWidth, outsideHeight int) (int, int) {
 
 // updates every frame
 func (ui *UI) Draw(screen *ebiten.Image) {
-	ui.Canvas.DrawSprites()
+	screen.Fill(color.White)
 
 	screen.DrawImage(ui.Canvas.Image(), nil)
 
@@ -83,11 +91,8 @@ func (ui *UI) handleDroppedFiles() error {
 					return nil
 				}
 
-				img, format, err := image.Decode(f)
+				img, _, err := image.Decode(f)
 				if err != nil {
-					if format == "" {
-						return nil
-					}
 					return err
 				}
 
