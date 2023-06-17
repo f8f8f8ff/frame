@@ -1,4 +1,4 @@
-package canvas
+package draw
 
 import (
 	"image"

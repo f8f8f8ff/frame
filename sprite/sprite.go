@@ -1,12 +1,11 @@
-package canvas
+package sprite
 
 import (
+	"frame/draw"
 	"image"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )
-
-type SpriteList []*Sprite
 
 type Sprite struct {
 	Image *ebiten.Image
@@ -29,7 +28,7 @@ func (s Sprite) Rect() image.Rectangle {
 
 // draws sprite, dv is a position offset
 func (s Sprite) Draw(dst *ebiten.Image, dv image.Point, alpha float64) {
-	DrawImage(dst, s.Image, s.Pos.Add(dv), alpha)
+	draw.DrawImage(dst, s.Image, s.Pos.Add(dv), alpha)
 }
 
 // draw sprite with ebiten.DrawImageOptions
@@ -40,7 +39,7 @@ func (s Sprite) DrawWithOps(dst *ebiten.Image, opts *ebiten.DrawImageOptions) {
 // resize, keep position
 func (s *Sprite) Resize(size image.Point) {
 	r := image.Rect(0, 0, size.X, size.Y)
-	i := ResizeImage(s.Image, r)
+	i := draw.ResizeImage(s.Image, r)
 	s.Image = i
 }
 
@@ -58,7 +57,7 @@ func (s *Sprite) Copy() *Sprite {
 }
 
 // gives the sprite at position in SpriteList
-func SpriteAt(sp SpriteList, p image.Point) *Sprite {
+func SpriteAt(sp []*Sprite, p image.Point) *Sprite {
 	for i := len(sp) - 1; i >= 0; i-- {
 		s := sp[i]
 		if s.In(p) {

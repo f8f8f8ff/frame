@@ -1,6 +1,7 @@
 package canvas
 
 import (
+	"frame/sprite"
 	"image"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -10,7 +11,7 @@ type Canvas struct {
 	Width   int
 	Height  int
 	image   *ebiten.Image
-	sprites SpriteList
+	sprites []*sprite.Sprite
 
 	cursor  image.Point
 	pressed bool
@@ -22,7 +23,7 @@ func NewCanvas(width, height int) *Canvas {
 		Width:   width,
 		Height:  height,
 		image:   i,
-		sprites: SpriteList{},
+		sprites: []*sprite.Sprite{},
 		cursor:  image.Point{},
 		pressed: false,
 	}
@@ -38,11 +39,11 @@ func (c Canvas) Image() *ebiten.Image {
 	return c.image
 }
 
-func (c *Canvas) AddSprite(s *Sprite) {
+func (c *Canvas) AddSprite(s *sprite.Sprite) {
 	c.sprites = append(c.sprites, s)
 }
 
-func (c *Canvas) RemoveSprite(s *Sprite) {
+func (c *Canvas) RemoveSprite(s *sprite.Sprite) {
 	if s == nil {
 		return
 	}
@@ -61,13 +62,13 @@ func (c *Canvas) RemoveSprite(s *Sprite) {
 
 func (c *Canvas) AddImage(img image.Image) {
 	i := ebiten.NewImageFromImage(img)
-	s := &Sprite{
+	s := &sprite.Sprite{
 		Image: i,
 		Pos:   image.Point{0, 0},
 	}
 	c.AddSprite(s)
 }
 
-func (c *Canvas) SpriteAt(p image.Point) *Sprite {
-	return SpriteAt(c.sprites, p)
+func (c *Canvas) SpriteAt(p image.Point) *sprite.Sprite {
+	return sprite.SpriteAt(c.sprites, p)
 }
