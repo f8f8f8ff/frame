@@ -36,6 +36,10 @@ func (s Sprite) DrawWithOps(dst *ebiten.Image, opts *ebiten.DrawImageOptions) {
 	dst.DrawImage(dst, opts)
 }
 
+func (s Sprite) DrawInverted(dst *ebiten.Image, dv image.Point, alpha float64) {
+	draw.DrawImageInverted(dst, s.Image, s.Pos.Add(dv), alpha)
+}
+
 // resize, keep position
 func (s *Sprite) Resize(size image.Point) {
 	r := image.Rect(0, 0, size.X, size.Y)

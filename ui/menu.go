@@ -4,6 +4,7 @@ import (
 	"frame/draw"
 	"frame/sprite"
 	"image"
+	"image/color"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )
@@ -34,6 +35,8 @@ func MainMenu() *Menu {
 		*sprite.Sprite
 	}{
 		{text: "test", operation: nil},
+		{text: "2", operation: nil},
+		{text: "3", operation: nil},
 	}
 	r := image.Rectangle{}
 	r.Min = MousePos()
@@ -89,7 +92,12 @@ func (m *Menu) createOptionSprites() {
 
 func (m *Menu) Draw(dst *ebiten.Image) {
 	for _, opt := range m.options {
+		if opt.In(MousePos()) {
+			opt.DrawInverted(dst, image.Point{0, 0}, 1)
+			continue
+		}
 		opt.Draw(dst, image.Point{0, 0}, 1)
 	}
 	// outline menu, invert highlighed
+	draw.StrokeRect(dst, m.rect, color.Black, 2, 2)
 }
