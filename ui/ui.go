@@ -18,7 +18,7 @@ type UI struct {
 	err   error
 	m     sync.Mutex
 
-	operation interface{}
+	operations []interface{}
 }
 
 func NewUI(w, h int) *UI {
@@ -37,18 +37,22 @@ func (ui *UI) Update() error {
 		return err
 	}
 
-	if ui.operation == nil {
+	if len(ui.operations) == 0 {
 		if MouseJustPressed(ebiten.MouseButtonRight) {
-			ui.operation = MainMenu()
+			ui.addOperation(MainMenu())
 		}
 	}
-	switch op := ui.operation.(type) {
-	case *Menu:
-		if o, done := op.Update(); done {
-			ui.operation = o
+	for _, ope := range ui.operations {
+		switch op := ope.(type) {
+		case *Menu:
+			if o, done := op.Update(); done {
+				ui.removeOperation(op)
+				ui.addOperation(o)
+			}
+		default:
+			log.Printf("unhandled operation: %T %v", op, op)
+			ui.removeOperation(op)
 		}
-	default:
-		log.Printf("operation: %v %T", op, op)
 	}
 
 	ui.Canvas.DrawSprites()
@@ -66,11 +70,31 @@ func (ui *UI) Draw(screen *ebiten.Image) {
 
 	screen.DrawImage(ui.Canvas.Image(), nil)
 
-	switch op := ui.operation.(type) {
-	case Drawable:
-		op.Draw(screen)
+	for _, ope := range ui.operations {
+		switch op := ope.(type) {
+		case Drawable:
+			op.Draw(screen)
+		}
 	}
 
 	msg := fmt.Sprintf("%0.f", ebiten.ActualFPS())
 	ebitenutil.DebugPrint(screen, msg)
+}
+
+func (ui *UI) addOperation(op interface{}) {
+	ui.operations = append(ui.operations, op)
+}
+
+func (ui *UI) removeOperation(op interface{}) {
+	index := -1
+	for i, o := range ui.operations {
+		if o == op {
+			index = i
+			break
+		}
+	}
+	if index == -1 {
+		return
+	}
+	ui.operations = append(ui.operations[:index], ui.operations[index+1:]...)
 }
