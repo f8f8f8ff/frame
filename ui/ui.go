@@ -41,11 +41,7 @@ func (ui *UI) Layout(outsideWidth, outsideHeight int) (int, int) {
 func (ui *UI) Draw(screen *ebiten.Image) {
 	ui.Canvas.DrawSprites()
 
-	i := ui.Canvas.Image()
-	if img, ok := i.(*image.RGBA); ok {
-		ui.image.WritePixels(img.Pix)
-	}
-	screen.DrawImage(ui.image, nil)
+	screen.DrawImage(ui.Canvas.Image(), nil)
 
 	msg := fmt.Sprintf("%0.2f", ebiten.ActualFPS())
 	ebitenutil.DebugPrint(screen, msg)

@@ -2,41 +2,30 @@ package canvas
 
 import (
 	"image"
+
+	"github.com/hajimehoshi/ebiten/v2"
 )
 
 type Sprite struct {
-	image image.Image
-	x     int
-	y     int
+	image *ebiten.Image
+	pos   image.Point
 }
 
-func (s Sprite) In(x, y int) bool {
-	p := image.Point{x - s.x, y - s.y}
+func (s Sprite) In(p image.Point) bool {
+	p = p.Sub(s.pos)
 	return p.In(s.image.Bounds())
 }
 
-func (s *Sprite) MoveBy(x, y int) {
-	// w, h := s.image.Bounds().Dx(), s.image.Bounds().Dy()
-	s.x += x
-	s.y += y
+func (s *Sprite) MoveBy(v image.Point) {
+	s.pos = s.pos.Add(v)
 }
 
 func (s Sprite) Rect() image.Rectangle {
-	return image.Rect(s.x, s.y, s.x+s.image.Bounds().Dx(), s.y+s.image.Bounds().Dy())
+	return s.image.Bounds().Add(s.pos)
 }
 
-func (s Sprite) Size() image.Point {
-	return s.image.Bounds().Size()
-}
-
-func (s Sprite) Draw(c *Context, dx, dy int, alpha int) {
-	if alpha < 1 {
-		return
-	}
-	if alpha < 255 {
-		SetOpacity(c, alpha)
-	}
-	c.DrawImage(s.image, s.x+dx, s.y+dy)
+func (s Sprite) Draw(dst *ebiten.Image, dv image.Point, alpha float64) {
+	DrawImage(dst, s.image, s.pos.Add(dv), alpha)
 }
 
 func (s *Sprite) Resize(size image.Point) {
@@ -45,17 +34,9 @@ func (s *Sprite) Resize(size image.Point) {
 	s.image = i
 }
 
-// func (s *Sprite) Draw(screen *ebiten.Image, dx, dy int, alpha float64, invert bool) {
-// 	op := &colorm.DrawImageOptions{}
-// 	op.GeoM.Translate(float64(s.x+dx), float64(s.y+dy))
-// 	c := colorm.ColorM{}
-// 	c.Scale(1, 1, 1, alpha)
-// 	if invert {
-// 		c.Scale(-1, -1, -1, 1)
-// 		c.Translate(1, 1, 1, 0)
-// 	}
-// 	colorm.DrawImage(screen, s.image, c, op)
-// }
+func (s *Sprite) Reshape(r image.Rectangle) {
+
+}
 
 // func (s *Sprite) Crop(r image.Rectangle) (newSprite *Sprite) {
 // 	x := r.Min.X - s.x
@@ -79,27 +60,6 @@ func (s *Sprite) Resize(size image.Point) {
 // 		image: ebiten.NewImageFromImage(croppedImage),
 // 		x:     newRect.Min.X,
 // 		y:     newRect.Min.Y,
-// 	}
-// }
-
-// func (s *Sprite) Reshape(r image.Rectangle) *Sprite {
-// 	oldW, oldH := s.image.Bounds().Dx(), s.image.Bounds().Dy()
-// 	w, h := r.Dx(), r.Dy()
-// 	if w < 1 || h < 1 {
-// 		return nil
-// 	}
-// 	scaleX := float64(w) / float64(oldW)
-// 	scaleY := float64(h) / float64(oldH)
-
-// 	newImg := ebiten.NewImage(w, h)
-// 	opt := &ebiten.DrawImageOptions{}
-// 	opt.GeoM.Scale(scaleX, scaleY)
-// 	newImg.DrawImage(s.image, opt)
-
-// 	return &Sprite{
-// 		image: newImg,
-// 		x:     r.Min.X,
-// 		y:     r.Min.Y,
 // 	}
 // }
 

@@ -2,37 +2,46 @@ package canvas
 
 import (
 	"image"
-	"image/color"
 
-	"golang.org/x/image/draw"
-
-	"github.com/fogleman/gg"
+	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/colorm"
 )
 
-type Context = gg.Context
-
-func NewContextForImage(im image.Image) *Context {
-	return gg.NewContextForImage(im)
+func ResizeImage(src *ebiten.Image, size image.Rectangle) *ebiten.Image {
+	opts := ResizeOpts(src.Bounds(), size)
+	im := ebiten.NewImage(size.Dx(), size.Dy())
+	im.DrawImage(src, &opts)
+	return im
 }
 
-func NewContext(width, height int) *Context {
-	return gg.NewContext(width, height)
+func ReshapeOpts(src image.Rectangle, dst image.Rectangle) ebiten.DrawImageOptions {
+	src = src.Canon()
+	dst = dst.Canon()
+	srcx, srcy := src.Dx(), src.Dy()
+	dstx, dsty := dst.Dx(), dst.Dy()
+	scalex := float64(srcx) / float64(dstx)
+	scaley := float64(srcy) / float64(dsty)
+	opt := ebiten.DrawImageOptions{}
+	opt.GeoM.Scale(scalex, scaley)
+
+	v := dst.Min.Sub(src.Min)
+	trx, try := float64(v.X), float64(v.Y)
+	opt.GeoM.Translate(trx, try)
+	return opt
 }
 
-func SetOpacity(c *Context, opacity int) error {
-	if opacity < 0 {
-		opacity = 0
-	} else if opacity > 255 {
-		opacity = 255
-	}
-	u := image.NewUniform(color.Alpha{uint8(opacity)})
-	m := image.NewAlpha(image.Rect(0, 0, c.Width(), c.Height()))
-	draw.Draw(m, m.Bounds(), u, image.Point{0, 0}, draw.Src)
-	return c.SetMask(m)
+func ResizeOpts(src image.Rectangle, dst image.Rectangle) ebiten.DrawImageOptions {
+	src = src.Canon()
+	dst = dst.Canon()
+	src = src.Sub(src.Min)
+	dst = dst.Sub(dst.Min)
+	return ReshapeOpts(src, dst)
 }
 
-func ResizeImage(src image.Image, size image.Rectangle) image.Image {
-	dst := image.NewRGBA(size)
-	draw.NearestNeighbor.Scale(dst, size, src, src.Bounds(), draw.Src, nil)
-	return dst
+func DrawImage(dst, src *ebiten.Image, pos image.Point, alpha float64) {
+	opts := &colorm.DrawImageOptions{}
+	opts.GeoM.Translate(float64(pos.X), float64(pos.Y))
+	col := colorm.ColorM{}
+	col.Scale(1, 1, 1, alpha)
+	colorm.DrawImage(dst, src, col, opts)
 }
