@@ -2,9 +2,11 @@ package draw
 
 import (
 	"image"
+	"image/color"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/colorm"
+	"github.com/hajimehoshi/ebiten/v2/vector"
 )
 
 func ResizeImage(src *ebiten.Image, size image.Rectangle) *ebiten.Image {
@@ -46,4 +48,21 @@ func DrawImage(dst, src *ebiten.Image, pos image.Point, alpha float64) {
 	colorm.DrawImage(dst, src, col, opts)
 }
 
+func DrawImageInverted(dst, src *ebiten.Image, pos image.Point, alpha float64) {
+	opts := &colorm.DrawImageOptions{}
+	opts.GeoM.Translate(float64(pos.X), float64(pos.Y))
+	col := colorm.ColorM{}
+	col.Scale(1, 1, 1, alpha)
+	col.Scale(-1, -1, -1, 1)
+	col.Translate(1, 1, 1, 0)
+	colorm.DrawImage(dst, src, col, opts)
+}
+
 // outline
+func StrokeRect(dst *ebiten.Image, rect image.Rectangle, clr color.Color, strokeWidth, offset float32) {
+	x := float32(rect.Min.X) - offset/2
+	y := float32(rect.Min.Y) - offset/2
+	w := float32(rect.Dx()) + offset
+	h := float32(rect.Dy()) + offset
+	vector.StrokeRect(dst, x, y, w, h, strokeWidth, clr, false)
+}
