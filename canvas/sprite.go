@@ -38,6 +38,16 @@ func (s *Sprite) Reshape(r image.Rectangle) {
 
 }
 
+func SpriteAt(sp []*Sprite, p image.Point) *Sprite {
+	for i := len(sp) - 1; i >= 0; i-- {
+		s := sp[i]
+		if s.In(p) {
+			return s
+		}
+	}
+	return nil
+}
+
 // func (s *Sprite) Crop(r image.Rectangle) (newSprite *Sprite) {
 // 	x := r.Min.X - s.x
 // 	y := r.Min.Y - s.y

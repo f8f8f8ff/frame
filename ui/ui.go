@@ -3,6 +3,7 @@ package ui
 import (
 	"fmt"
 	"image/color"
+	"log"
 	"sync"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -16,6 +17,8 @@ type UI struct {
 	image *ebiten.Image
 	err   error
 	m     sync.Mutex
+
+	operation interface{}
 }
 
 func NewUI(w, h int) *UI {
@@ -33,6 +36,13 @@ func (ui *UI) Update() error {
 	if err != nil {
 		return err
 	}
+
+	if ui.operation == nil {
+		if MouseJustPressed(ebiten.MouseButtonRight) {
+			log.Println("NewMenu(MousePos())")
+		}
+	}
+
 	ui.Canvas.DrawSprites()
 	return nil
 }

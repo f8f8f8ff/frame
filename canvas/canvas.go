@@ -67,3 +67,7 @@ func (c *Canvas) AddImage(img image.Image) {
 	}
 	c.AddSprite(s)
 }
+
+func (c *Canvas) SpriteAt(p image.Point) *Sprite {
+	return SpriteAt(c.sprites, p)
+}
