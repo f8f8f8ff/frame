@@ -6,39 +6,59 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
+type SpriteList []*Sprite
+
 type Sprite struct {
-	image *ebiten.Image
-	pos   image.Point
+	Image *ebiten.Image
+	Pos   image.Point
 }
 
+// returns true if point is within the bounds of the sprite
 func (s Sprite) In(p image.Point) bool {
-	p = p.Sub(s.pos)
-	return p.In(s.image.Bounds())
+	p = p.Sub(s.Pos)
+	return p.In(s.Image.Bounds())
 }
 
 func (s *Sprite) MoveBy(v image.Point) {
-	s.pos = s.pos.Add(v)
+	s.Pos = s.Pos.Add(v)
 }
 
 func (s Sprite) Rect() image.Rectangle {
-	return s.image.Bounds().Add(s.pos)
+	return s.Image.Bounds().Add(s.Pos)
 }
 
+// draws sprite, dv is a position offset
 func (s Sprite) Draw(dst *ebiten.Image, dv image.Point, alpha float64) {
-	DrawImage(dst, s.image, s.pos.Add(dv), alpha)
+	DrawImage(dst, s.Image, s.Pos.Add(dv), alpha)
 }
 
+// draw sprite with ebiten.DrawImageOptions
+func (s Sprite) DrawWithOps(dst *ebiten.Image, opts *ebiten.DrawImageOptions) {
+	dst.DrawImage(dst, opts)
+}
+
+// resize, keep position
 func (s *Sprite) Resize(size image.Point) {
 	r := image.Rect(0, 0, size.X, size.Y)
-	i := ResizeImage(s.image, r)
-	s.image = i
+	i := ResizeImage(s.Image, r)
+	s.Image = i
 }
 
+// resize, set position
 func (s *Sprite) Reshape(r image.Rectangle) {
 
 }
 
-func SpriteAt(sp []*Sprite, p image.Point) *Sprite {
+// returns a pointer to a new copy of the sprite
+func (s *Sprite) Copy() *Sprite {
+	return &Sprite{
+		Image: ebiten.NewImageFromImage(s.Image),
+		Pos:   s.Pos,
+	}
+}
+
+// gives the sprite at position in SpriteList
+func SpriteAt(sp SpriteList, p image.Point) *Sprite {
 	for i := len(sp) - 1; i >= 0; i-- {
 		s := sp[i]
 		if s.In(p) {
@@ -70,14 +90,6 @@ func SpriteAt(sp []*Sprite, p image.Point) *Sprite {
 // 		image: ebiten.NewImageFromImage(croppedImage),
 // 		x:     newRect.Min.X,
 // 		y:     newRect.Min.Y,
-// 	}
-// }
-
-// func (s *Sprite) Copy() Sprite {
-// 	return Sprite{
-// 		image: ebiten.NewImageFromImage(s.image),
-// 		x:     s.x,
-// 		y:     s.y,
 // 	}
 // }
 

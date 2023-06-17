@@ -47,6 +47,7 @@ func (ui *UI) Update() error {
 	return nil
 }
 
+// TODO resize canvas
 func (ui *UI) Layout(outsideWidth, outsideHeight int) (int, int) {
 	return outsideWidth, outsideHeight
 }

@@ -10,7 +10,7 @@ type Canvas struct {
 	Width   int
 	Height  int
 	image   *ebiten.Image
-	sprites []*Sprite
+	sprites SpriteList
 
 	cursor  image.Point
 	pressed bool
@@ -22,7 +22,7 @@ func NewCanvas(width, height int) *Canvas {
 		Width:   width,
 		Height:  height,
 		image:   i,
-		sprites: []*Sprite{},
+		sprites: SpriteList{},
 		cursor:  image.Point{},
 		pressed: false,
 	}
@@ -62,8 +62,8 @@ func (c *Canvas) RemoveSprite(s *Sprite) {
 func (c *Canvas) AddImage(img image.Image) {
 	i := ebiten.NewImageFromImage(img)
 	s := &Sprite{
-		image: i,
-		pos:   image.Point{0, 0},
+		Image: i,
+		Pos:   image.Point{0, 0},
 	}
 	c.AddSprite(s)
 }
