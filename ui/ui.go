@@ -47,6 +47,6 @@ func (ui *UI) Draw(screen *ebiten.Image) {
 
 	screen.DrawImage(ui.Canvas.Image(), nil)
 
-	msg := fmt.Sprintf("%0.2f", ebiten.ActualFPS())
+	msg := fmt.Sprintf("%0.f", ebiten.ActualFPS())
 	ebitenutil.DebugPrint(screen, msg)
 }
