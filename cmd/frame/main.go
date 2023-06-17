@@ -1,7 +1,7 @@
 package main
 
 import (
-	"frame/uiebiten"
+	"frame/ui"
 	"log"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -17,7 +17,7 @@ func main() {
 	ebiten.SetWindowTitle("title")
 	ebiten.SetWindowResizingMode(ebiten.WindowResizingModeEnabled)
 	ebiten.SetVsyncEnabled(false)
-	ui := uiebiten.NewUI(initScreenWidth, initScreenHeight)
+	ui := ui.NewUI(initScreenWidth, initScreenHeight)
 	if err := ebiten.RunGame(ui); err != nil {
 		log.Fatal(err)
 	}

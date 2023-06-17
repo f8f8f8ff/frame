@@ -1,4 +1,4 @@
-package uiebiten
+package ui
 
 import (
 	"fmt"
