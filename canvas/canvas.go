@@ -3,6 +3,7 @@ package canvas
 import (
 	"frame/sprite"
 	"image"
+	"image/color"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )
@@ -30,6 +31,7 @@ func NewCanvas(width, height int) *Canvas {
 }
 
 func (c *Canvas) DrawSprites() {
+	c.image.Fill(color.Transparent)
 	for _, s := range c.sprites {
 		s.Draw(c.image, image.Point{0, 0}, 1)
 	}

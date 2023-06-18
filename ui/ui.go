@@ -18,8 +18,8 @@ type UI struct {
 	err   error
 	m     sync.Mutex
 
-	operations  []interface{}
-	moveReorder bool
+	operations []interface{}
+	//moveReorder bool
 }
 
 func NewUI(w, h int) *UI {

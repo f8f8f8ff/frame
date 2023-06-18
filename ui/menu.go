@@ -25,8 +25,8 @@ func MainMenu() *Menu {
 		operation interface{}
 		*sprite.Sprite
 	}{
-		{text: "test", operation: nil},
-		{text: "2", operation: nil},
+		{text: "nil", operation: nil},
+		{text: "move", operation: &MoveOp{}},
 		{text: "select", operation: &SelectOp{clr: color.Black}},
 	}
 	r := image.Rectangle{}

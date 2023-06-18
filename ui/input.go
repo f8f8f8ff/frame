@@ -39,7 +39,7 @@ func (e *MouseDrag) Update() {
 		return
 	}
 	e.End = MousePos()
-	if MouseJustReleased(ebiten.MouseButtonLeft) {
+	if e.Started && MouseJustReleased(ebiten.MouseButtonLeft) {
 		e.Released = true
 	}
 }
