@@ -33,10 +33,7 @@ func (e *MouseDrag) Update() {
 	if e.Released {
 		return
 	}
-	if !MouseJustPressed(ebiten.MouseButtonLeft) {
-		return
-	}
-	if !e.Started {
+	if !e.Started && MouseJustPressed(ebiten.MouseButtonLeft) {
 		e.Started = true
 		e.Start = MousePos()
 		return
@@ -53,8 +50,8 @@ func (e *MouseDrag) Diff() image.Point {
 
 func (e *MouseDrag) Moved() bool {
 	const moveThreshold int = 2
-	d := e.Diff()
-	if d.X < moveThreshold || d.Y < moveThreshold {
+	r := e.Rect().Canon()
+	if r.Dx() < moveThreshold || r.Dy() < moveThreshold {
 		return false
 	}
 	return true
@@ -77,4 +74,14 @@ func MouseJustPressed(button ebiten.MouseButton) bool {
 }
 func MouseJustReleased(button ebiten.MouseButton) bool {
 	return inpututil.IsMouseButtonJustReleased(button)
+}
+
+func CancelInput() bool {
+	if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonRight) {
+		return true
+	}
+	if inpututil.IsKeyJustPressed(ebiten.KeyEscape) {
+		return true
+	}
+	return false
 }
