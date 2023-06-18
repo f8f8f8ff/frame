@@ -25,16 +25,19 @@ type MouseDrag struct {
 	Start image.Point
 	End   image.Point
 	ebiten.MouseButton
-	Started  bool
-	Released bool
+	Started     bool
+	JustStarted bool
+	Released    bool
 }
 
 func (e *MouseDrag) Update() {
+	e.JustStarted = false
 	if e.Released {
 		return
 	}
 	if !e.Started && MouseJustPressed(ebiten.MouseButtonLeft) {
 		e.Started = true
+		e.JustStarted = true
 		e.Start = MousePos()
 		return
 	}

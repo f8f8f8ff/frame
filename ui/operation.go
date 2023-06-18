@@ -17,6 +17,10 @@ type Drawable interface {
 	Draw(*ebiten.Image)
 }
 
+type RequiresSelection interface {
+	Select(*UI) (done, success bool)
+}
+
 type SelectOp struct {
 	clr     color.Color
 	drag    MouseDrag
@@ -34,7 +38,8 @@ func (op *SelectOp) Update(ui *UI) (done bool, err error) {
 		op.moved = op.drag.Moved()
 	}
 	c := ui.Canvas
-	if len(op.Targets) == 0 && !op.moved {
+	// first click
+	if op.drag.JustStarted {
 		sp := c.SpriteAt(MousePos())
 		if sp == nil {
 			return false, nil
@@ -43,17 +48,20 @@ func (op *SelectOp) Update(ui *UI) (done bool, err error) {
 		op.done = true
 		return true, nil
 	}
+	if op.drag.Released {
+		op.done = true
+		return true, nil
+	}
+	if !op.moved {
+		return false, nil
+	}
 	op.Targets = []*sprite.Sprite{}
 	for _, sp := range c.Sprites() {
 		if sp.Overlaps(op.drag.Rect()) {
 			op.Targets = append(op.Targets, sp)
 		}
 	}
-	if !op.drag.Released {
-		return false, nil
-	}
-	op.done = true
-	return true, nil
+	return false, nil
 }
 
 func (op *SelectOp) Draw(dst *ebiten.Image) {
