@@ -26,10 +26,6 @@ type SelectOp struct {
 }
 
 func (op *SelectOp) Update(ui *UI) (done bool, err error) {
-	if CancelInput() {
-		op.done = true
-		return true, nil
-	}
 	op.drag.Update()
 	if !op.drag.Started {
 		return false, nil
@@ -61,6 +57,7 @@ func (op *SelectOp) Update(ui *UI) (done bool, err error) {
 }
 
 func (op *SelectOp) Draw(dst *ebiten.Image) {
+	// TODO hover
 	for _, sp := range op.Targets {
 		// outline
 		draw.StrokeRect(dst, sp.Rect(), op.clr, 1, -1)
@@ -77,9 +74,6 @@ type MoveOp struct {
 }
 
 func (op *MoveOp) Update(ui *UI) (done bool, err error) {
-	if CancelInput() {
-		return true, nil
-	}
 	if op.selOp == nil {
 		op.selOp = &SelectOp{clr: color.Black}
 		ui.addOperation(op.selOp)

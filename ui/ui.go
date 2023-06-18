@@ -43,7 +43,18 @@ func (ui *UI) Update() error {
 			ui.addOperation(MainMenu())
 		}
 	}
+	ui.HandleOperations()
+
+	ui.Canvas.DrawSprites()
+	return nil
+}
+
+func (ui *UI) HandleOperations() (err error) {
 	for _, ope := range ui.operations {
+		if ope == nil {
+			ui.removeOperation(ope)
+			continue
+		}
 		switch op := ope.(type) {
 		case *Menu:
 			if o, done := op.Update(); done {
@@ -51,17 +62,16 @@ func (ui *UI) Update() error {
 				ui.addOperation(o)
 			}
 		case Operation:
-			if done, _ := op.Update(ui); done {
+			if done, e := op.Update(ui); done {
 				ui.removeOperation(op)
+				err = e
 			}
 		default:
 			log.Printf("unhandled operation: %T %v", op, op)
 			ui.removeOperation(op)
 		}
 	}
-
-	ui.Canvas.DrawSprites()
-	return nil
+	return err
 }
 
 // TODO resize canvas
@@ -82,7 +92,12 @@ func (ui *UI) Draw(screen *ebiten.Image) {
 		}
 	}
 
-	msg := fmt.Sprintf("%0.f", ebiten.ActualFPS())
+	msg := fmt.Sprintf("%0.f\n", ebiten.ActualFPS())
+	if len(ui.operations) > 0 {
+		for _, o := range ui.operations {
+			msg += fmt.Sprintf("%T %v\n", o, o)
+		}
+	}
 	ebitenutil.DebugPrint(screen, msg)
 }
 
