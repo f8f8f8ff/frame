@@ -18,6 +18,16 @@ func (s Sprite) In(p image.Point) bool {
 	return p.In(s.Image.Bounds())
 }
 
+// returns if sprite overlaps r
+func (s Sprite) Overlaps(r image.Rectangle) bool {
+	return s.Rect().Overlaps(r)
+}
+
+// returns if sprite is in r
+func (s Sprite) InRect(r image.Rectangle) bool {
+	return s.Rect().In(r)
+}
+
 func (s *Sprite) MoveBy(v image.Point) {
 	s.Pos = s.Pos.Add(v)
 }

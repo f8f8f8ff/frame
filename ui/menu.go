@@ -9,15 +9,6 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
-type Operation interface {
-	Update() (done bool, err error)
-}
-
-type Drawable interface {
-	//Operation
-	Draw(*ebiten.Image)
-}
-
 type Menu struct {
 	options []*struct {
 		text      string
@@ -36,7 +27,7 @@ func MainMenu() *Menu {
 	}{
 		{text: "test", operation: nil},
 		{text: "2", operation: nil},
-		{text: "3", operation: nil},
+		{text: "select", operation: &SelectOp{clr: color.Black}},
 	}
 	r := image.Rectangle{}
 	r.Min = MousePos()

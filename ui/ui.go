@@ -18,7 +18,8 @@ type UI struct {
 	err   error
 	m     sync.Mutex
 
-	operations []interface{}
+	operations  []interface{}
+	moveReorder bool
 }
 
 func NewUI(w, h int) *UI {
@@ -48,6 +49,10 @@ func (ui *UI) Update() error {
 			if o, done := op.Update(); done {
 				ui.removeOperation(op)
 				ui.addOperation(o)
+			}
+		case Operation:
+			if done, _ := op.Update(ui); done {
+				ui.removeOperation(op)
 			}
 		default:
 			log.Printf("unhandled operation: %T %v", op, op)
