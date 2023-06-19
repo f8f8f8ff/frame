@@ -168,3 +168,46 @@ func (op *CropOp) Draw(dst *ebiten.Image) {
 	}
 	draw.StrokeRect(dst, op.drag.Rect(), clr, 2, 2)
 }
+
+type ReshapeOp struct {
+	drag   MouseDrag
+	Target *sprite.Sprite
+}
+
+func (op *ReshapeOp) Update(ui *UI) (done bool, err error) {
+	if op.Target == nil {
+		if MouseJustPressed(ebiten.MouseButtonLeft) {
+			s := ui.Canvas.SpriteAt(MousePos())
+			if s == nil {
+				return true, nil
+			}
+			op.Target = s
+		}
+		return false, nil
+	}
+	if !op.drag.Update() {
+		return false, nil
+	}
+	if !op.drag.Moved() {
+		return true, nil
+	}
+	op.Target.Reshape(op.drag.Rect())
+	return true, nil
+}
+
+func (op *ReshapeOp) Draw(dst *ebiten.Image) {
+	// TODO hover
+	clr := color.RGBA{0, 0, 255, 255}
+	if op.Target != nil {
+		// outline
+		draw.StrokeRect(dst, op.Target.Rect(), clr, 1, -1)
+	}
+	if !op.drag.Started {
+		return
+	}
+	if op.drag.Moved() {
+		opts := draw.ReshapeOpts(op.Target.Rect(), op.drag.Rect())
+		op.Target.DrawWithOps(dst, &opts, 0.5)
+	}
+	draw.StrokeRect(dst, op.drag.Rect(), clr, 2, 2)
+}

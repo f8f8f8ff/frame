@@ -5,6 +5,7 @@ import (
 	"image"
 
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/colorm"
 )
 
 type Sprite struct {
@@ -42,8 +43,12 @@ func (s Sprite) Draw(dst *ebiten.Image, dv image.Point, alpha float64) {
 }
 
 // draw sprite with ebiten.DrawImageOptions
-func (s Sprite) DrawWithOps(dst *ebiten.Image, opts *ebiten.DrawImageOptions) {
-	dst.DrawImage(dst, opts)
+func (s Sprite) DrawWithOps(dst *ebiten.Image, opts *ebiten.DrawImageOptions, alpha float64) {
+	copts := &colorm.DrawImageOptions{}
+	copts.GeoM = opts.GeoM
+	col := colorm.ColorM{}
+	col.Scale(1, 1, 1, alpha)
+	colorm.DrawImage(dst, s.Image, col, copts)
 }
 
 func (s Sprite) DrawInverted(dst *ebiten.Image, dv image.Point, alpha float64) {
@@ -51,15 +56,19 @@ func (s Sprite) DrawInverted(dst *ebiten.Image, dv image.Point, alpha float64) {
 }
 
 // resize, keep position
-func (s *Sprite) Resize(size image.Point) {
-	r := image.Rect(0, 0, size.X, size.Y)
+func (s *Sprite) Resize(newSize image.Point) {
+	r := image.Rect(0, 0, newSize.X, newSize.Y)
 	i := draw.ResizeImage(s.Image, r)
 	s.Image = i
 }
 
 // resize, set position
 func (s *Sprite) Reshape(r image.Rectangle) {
-
+	r = r.Canon()
+	newSize := r.Sub(r.Min)
+	i := draw.ResizeImage(s.Image, newSize)
+	s.Image = i
+	s.Pos = r.Min
 }
 
 // returns a pointer to a new copy of the sprite
