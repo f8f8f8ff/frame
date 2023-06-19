@@ -28,6 +28,10 @@ type SelectOp struct {
 func (op *SelectOp) Update(ui *UI) (done bool, err error) {
 	op.drag.Update()
 	if !op.drag.Started {
+		op.Targets = []*sprite.Sprite{}
+		if sp := ui.Canvas.SpriteAt(MousePos()); sp != nil {
+			op.Targets = append(op.Targets, sp)
+		}
 		return false, nil
 	}
 	if !op.moved {
@@ -36,6 +40,7 @@ func (op *SelectOp) Update(ui *UI) (done bool, err error) {
 	c := ui.Canvas
 	// first click
 	if op.drag.JustStarted {
+		op.Targets = []*sprite.Sprite{}
 		sp := c.SpriteAt(MousePos())
 		if sp == nil {
 			return false, nil
@@ -61,7 +66,6 @@ func (op *SelectOp) Update(ui *UI) (done bool, err error) {
 }
 
 func (op *SelectOp) Draw(dst *ebiten.Image) {
-	// TODO hover
 	for _, sp := range op.Targets {
 		// outline
 		draw.StrokeRect(dst, sp.Rect(), op.clr, 1, -1)
@@ -288,4 +292,29 @@ func (op *FlatReshapeOp) Draw(dst *ebiten.Image) {
 		op.spr.DrawWithOps(dst, &opts, 1)
 	}
 	draw.StrokeRect(dst, op.drag2.Rect(), clr, 2, 2)
+}
+
+type DeleteOp struct {
+	selOp   *SelectOp
+	Targets []*sprite.Sprite
+}
+
+func (op *DeleteOp) Update(ui *UI) (done bool, err error) {
+	if len(op.Targets) == 0 {
+		if op.selOp == nil {
+			op.selOp = &SelectOp{clr: color.RGBA{255, 0, 0, 255}}
+			ui.addOperation(op.selOp)
+		}
+		if !op.selOp.done {
+			return false, nil
+		}
+		op.Targets = op.selOp.Targets
+		if len(op.Targets) == 0 {
+			return true, nil
+		}
+	}
+	for _, sp := range op.Targets {
+		ui.Canvas.RemoveSprite(sp)
+	}
+	return true, nil
 }

@@ -30,6 +30,7 @@ func MainMenu() *Menu {
 		{text: "crop", operation: &CropOp{}},
 		{text: "reshape", operation: &ReshapeOp{}},
 		{text: "liftshape", operation: &FlatReshapeOp{}},
+		{text: "delete", operation: &DeleteOp{}},
 		{text: "select", operation: &SelectOp{clr: color.Black}},
 	}
 	r := image.Rectangle{}
