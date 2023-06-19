@@ -73,10 +73,9 @@ func (op *SelectOp) Draw(dst *ebiten.Image) {
 }
 
 type MoveOp struct {
-	selOp    *SelectOp
-	drag     MouseDrag
-	Targets  []*sprite.Sprite
-	Selected bool
+	selOp   *SelectOp
+	drag    MouseDrag
+	Targets []*sprite.Sprite
 }
 
 func (op *MoveOp) Update(ui *UI) (done bool, err error) {
