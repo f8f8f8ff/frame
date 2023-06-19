@@ -41,6 +41,10 @@ func (ui *UI) Update() error {
 	if err != nil {
 		return err
 	}
+	err = ui.handlePaste()
+	if err != nil {
+		return err
+	}
 
 	if len(ui.operations) == 0 {
 		if MouseJustPressed(ebiten.MouseButtonRight) {

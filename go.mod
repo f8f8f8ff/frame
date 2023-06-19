@@ -4,6 +4,7 @@ go 1.20
 
 require (
 	github.com/hajimehoshi/ebiten/v2 v2.5.4
+	golang.design/x/clipboard v0.7.0
 	golang.org/x/image v0.6.0
 )
 
