@@ -10,9 +10,10 @@ import (
 )
 
 func MainMenu() *Menu {
-	utilityMenu := NewMenu([]*MenuOption{
+	utilityMenuOps := []*MenuOption{
 		{text: "(un)lock order", operation: &LockOrderOp{}},
-	}, ebiten.MouseButtonLeft)
+	}
+	utilityMenu := NewMenu(utilityMenuOps, ebiten.MouseButtonLeft)
 
 	options := []*MenuOption{
 		{text: "nil", operation: nil},
