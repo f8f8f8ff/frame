@@ -62,6 +62,9 @@ func (ui *UI) HandleOperations() (err error) {
 				ui.addOperation(o)
 			}
 		case Operation:
+			if CancelInput() {
+				ui.operations = []interface{}{}
+			}
 			if done, e := op.Update(ui); done {
 				ui.removeOperation(op)
 				err = e
