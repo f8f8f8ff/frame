@@ -45,6 +45,9 @@ func (ui *UI) Update() error {
 		if MouseJustPressed(ebiten.MouseButtonRight) {
 			ui.addOperation(MainMenu())
 		}
+		if MouseJustPressed(ebiten.MouseButtonLeft) {
+			ui.addOperation(&DragOp{})
+		}
 	}
 	ui.HandleOperations()
 

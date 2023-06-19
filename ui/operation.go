@@ -108,13 +108,10 @@ func (op *MoveOp) Update(ui *UI) (done bool, err error) {
 }
 
 func (op *MoveOp) Draw(dst *ebiten.Image) {
-	if op.selOp == nil {
+	if len(op.Targets) == 0 {
 		return
 	}
-	if !op.selOp.done {
-		return
-	}
-	for _, sp := range op.selOp.Targets {
+	for _, sp := range op.Targets {
 		// TODO outline func
 		draw.StrokeRect(dst, sp.Rect(), color.Black, 1, -1)
 		if op.drag.Started {
@@ -265,4 +262,30 @@ func (op *FlatReshapeOp) Draw(dst *ebiten.Image) {
 		op.spr.DrawWithOps(dst, &opts, 1)
 	}
 	draw.StrokeRect(dst, op.drag2.Rect(), clr, 2, 2)
+}
+
+type DragOp struct {
+	moveOp  *MoveOp
+	Targets []*sprite.Sprite
+}
+
+func (op *DragOp) Update(ui *UI) (done bool, err error) {
+	if len(op.Targets) == 0 {
+		if MouseJustPressed(ebiten.MouseButtonLeft) {
+			s := ui.Canvas.SpriteAt(MousePos())
+			if s == nil {
+				return true, nil
+			}
+			op.Targets = append(op.Targets, s)
+		}
+		// return false, nil
+	}
+	op.moveOp = &MoveOp{
+		Targets: op.Targets,
+	}
+	// update once to update the drag on the same update
+	if done, _ := op.moveOp.Update(ui); !done {
+		ui.addOperation(op.moveOp)
+	}
+	return true, nil
 }

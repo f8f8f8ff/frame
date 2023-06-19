@@ -39,6 +39,7 @@ func (e *MouseDrag) Update() (done bool) {
 		e.Started = true
 		e.JustStarted = true
 		e.Start = MousePos()
+		e.End = MousePos()
 		return false
 	}
 	e.End = MousePos()
