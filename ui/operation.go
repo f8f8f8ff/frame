@@ -4,7 +4,6 @@ import (
 	"frame/draw"
 	"frame/sprite"
 	"image/color"
-	"log"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )
@@ -92,8 +91,7 @@ func (op *MoveOp) Update(ui *UI) (done bool, err error) {
 			return true, nil
 		}
 	}
-	op.drag.Update()
-	if !op.drag.Started {
+	if !op.drag.Update() {
 		return false, nil
 	}
 	// TODO reorder
@@ -102,10 +100,6 @@ func (op *MoveOp) Update(ui *UI) (done bool, err error) {
 	// 	c.RemoveSprite(op.target)
 	// 	c.AddSprite(op.target)
 	// }
-	log.Println("dragging", op.Targets)
-	if !op.drag.Released {
-		return false, nil
-	}
 	for _, sp := range op.Targets {
 		sp.MoveBy(op.drag.Diff())
 	}
@@ -148,12 +142,7 @@ func (op *CropOp) Update(ui *UI) (done bool, err error) {
 			return true, nil
 		}
 	}
-	op.drag.Update()
-	if !op.drag.Started {
-		return false, nil
-	}
-	log.Println("cropping", op.Targets)
-	if !op.drag.Released {
+	if !op.drag.Update() {
 		return false, nil
 	}
 	for _, sp := range op.Targets {
@@ -177,5 +166,5 @@ func (op *CropOp) Draw(dst *ebiten.Image) {
 	if !op.drag.Started {
 		return
 	}
-	draw.StrokeRect(dst, op.drag.Rect(), clr, 2, 0)
+	draw.StrokeRect(dst, op.drag.Rect(), clr, 2, 2)
 }
