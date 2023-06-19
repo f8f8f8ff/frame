@@ -30,6 +30,12 @@ func NewCanvas(width, height int) *Canvas {
 	}
 }
 
+func (c *Canvas) Resize(width, height int) {
+	i := ebiten.NewImage(width, height)
+	i.DrawImage(c.image, nil)
+	c.image = i
+}
+
 func (c *Canvas) DrawSprites() {
 	c.image.Fill(color.Transparent)
 	for _, s := range c.sprites {

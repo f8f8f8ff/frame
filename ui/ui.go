@@ -13,6 +13,9 @@ import (
 )
 
 type UI struct {
+	Width  int
+	Height int
+
 	*canvas.Canvas
 	image *ebiten.Image
 	err   error
@@ -77,9 +80,13 @@ func (ui *UI) HandleOperations() (err error) {
 	return err
 }
 
-// TODO resize canvas
-func (ui *UI) Layout(outsideWidth, outsideHeight int) (int, int) {
-	return outsideWidth, outsideHeight
+func (ui *UI) Layout(newWidth, newHeight int) (int, int) {
+	if newWidth != ui.Width || newHeight != ui.Height {
+		ui.Width = newWidth
+		ui.Height = newHeight
+		ui.Canvas.Resize(ui.Width, ui.Height)
+	}
+	return ui.Width, ui.Height
 }
 
 // updates every frame
