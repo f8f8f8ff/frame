@@ -31,7 +31,7 @@ func MainMenu() *Menu {
 		{text: "reshape", operation: &ReshapeOp{}},
 		{text: "liftshape", operation: &FlatReshapeOp{}},
 		{text: "delete", operation: &DeleteOp{}},
-		{text: "select", operation: &SelectOp{clr: color.Black}},
+		{text: "(un)lock order", operation: &LockOrderOp{}},
 	}
 	r := image.Rectangle{}
 	r.Min = MousePos()

@@ -22,7 +22,7 @@ type UI struct {
 	m     sync.Mutex
 
 	operations []interface{}
-	//moveReorder bool
+	LockOrder  bool
 }
 
 func NewUI(w, h int) *UI {

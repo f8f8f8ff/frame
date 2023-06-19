@@ -99,13 +99,11 @@ func (op *MoveOp) Update(ui *UI) (done bool, err error) {
 	if !op.drag.Update() {
 		return false, nil
 	}
-	// TODO reorder
-	//c := ui.Canvas
-	// if ui.moveReorder {
-	// 	c.RemoveSprite(op.target)
-	// 	c.AddSprite(op.target)
-	// }
 	for _, sp := range op.Targets {
+		if !ui.LockOrder {
+			ui.Canvas.RemoveSprite(sp)
+			ui.Canvas.AddSprite(sp)
+		}
 		sp.MoveBy(op.drag.Diff())
 	}
 	return true, nil
@@ -185,7 +183,6 @@ func (op *CropOp) Update(ui *UI) (done bool, err error) {
 }
 
 func (op *CropOp) Draw(dst *ebiten.Image) {
-	// TODO hover
 	clr := color.RGBA{0, 255, 0, 255}
 	for _, sp := range op.Targets {
 		// outline
@@ -224,7 +221,6 @@ func (op *ReshapeOp) Update(ui *UI) (done bool, err error) {
 }
 
 func (op *ReshapeOp) Draw(dst *ebiten.Image) {
-	// TODO hover
 	clr := color.RGBA{0, 0, 255, 255}
 	if op.Target != nil {
 		// outline
@@ -237,7 +233,7 @@ func (op *ReshapeOp) Draw(dst *ebiten.Image) {
 		opts := draw.ReshapeOpts(op.Target.Rect(), op.drag.Rect())
 		op.Target.DrawWithOps(dst, &opts, 1)
 	}
-	draw.StrokeRect(dst, op.drag.Rect(), clr, 2, 2)
+	draw.StrokeRect(dst, op.drag.Rect(), clr, 2, -2)
 }
 
 type FlatReshapeOp struct {
@@ -278,7 +274,6 @@ func (op *FlatReshapeOp) Update(ui *UI) (done bool, err error) {
 }
 
 func (op *FlatReshapeOp) Draw(dst *ebiten.Image) {
-	// TODO hover
 	clr := color.RGBA{0, 0, 255, 255}
 	if !op.drag.Started {
 		return
@@ -291,7 +286,7 @@ func (op *FlatReshapeOp) Draw(dst *ebiten.Image) {
 		opts := draw.ReshapeOpts(op.spr.Rect(), op.drag2.Rect())
 		op.spr.DrawWithOps(dst, &opts, 1)
 	}
-	draw.StrokeRect(dst, op.drag2.Rect(), clr, 2, 2)
+	draw.StrokeRect(dst, op.drag2.Rect(), clr, 2, -2)
 }
 
 type DeleteOp struct {
@@ -316,5 +311,12 @@ func (op *DeleteOp) Update(ui *UI) (done bool, err error) {
 	for _, sp := range op.Targets {
 		ui.Canvas.RemoveSprite(sp)
 	}
+	return true, nil
+}
+
+type LockOrderOp struct{}
+
+func (op *LockOrderOp) Update(ui *UI) (done bool, err error) {
+	ui.LockOrder = !ui.LockOrder
 	return true, nil
 }
