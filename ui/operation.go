@@ -3,6 +3,7 @@ package ui
 import (
 	"frame/draw"
 	"frame/sprite"
+	"image"
 	"image/color"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -207,7 +208,61 @@ func (op *ReshapeOp) Draw(dst *ebiten.Image) {
 	}
 	if op.drag.Moved() {
 		opts := draw.ReshapeOpts(op.Target.Rect(), op.drag.Rect())
-		op.Target.DrawWithOps(dst, &opts, 0.5)
+		op.Target.DrawWithOps(dst, &opts, 1)
 	}
 	draw.StrokeRect(dst, op.drag.Rect(), clr, 2, 2)
+}
+
+type FlatReshapeOp struct {
+	drag  MouseDrag
+	drag2 MouseDrag
+	spr   *sprite.Sprite
+}
+
+func (op *FlatReshapeOp) Update(ui *UI) (done bool, err error) {
+	if !op.drag.Update() {
+		return false, nil
+	}
+	if !op.drag.Moved() {
+		return true, nil
+	}
+
+	if op.spr == nil {
+		im, r := draw.CropImage(ui.Canvas.Image(), op.drag.Rect(), image.Point{0, 0})
+		if im == nil {
+			return true, nil // error
+		}
+		op.spr = &sprite.Sprite{
+			Image: im,
+			Pos:   r.Min,
+		}
+	}
+
+	if !op.drag2.Update() {
+		return false, nil
+	}
+	if !op.drag2.Moved() {
+		return true, nil
+	}
+
+	op.spr.Reshape(op.drag2.Rect())
+	ui.Canvas.AddSprite(op.spr)
+	return true, nil
+}
+
+func (op *FlatReshapeOp) Draw(dst *ebiten.Image) {
+	// TODO hover
+	clr := color.RGBA{0, 0, 255, 255}
+	if !op.drag.Started {
+		return
+	}
+	draw.StrokeRect(dst, op.drag.Rect(), clr, 1, 1)
+	if !op.drag2.Started {
+		return
+	}
+	if op.drag2.Moved() {
+		opts := draw.ReshapeOpts(op.spr.Rect(), op.drag2.Rect())
+		op.spr.DrawWithOps(dst, &opts, 1)
+	}
+	draw.StrokeRect(dst, op.drag2.Rect(), clr, 2, 2)
 }

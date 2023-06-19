@@ -46,6 +46,7 @@ func (s Sprite) Draw(dst *ebiten.Image, dv image.Point, alpha float64) {
 func (s Sprite) DrawWithOps(dst *ebiten.Image, opts *ebiten.DrawImageOptions, alpha float64) {
 	copts := &colorm.DrawImageOptions{}
 	copts.GeoM = opts.GeoM
+	copts.GeoM.Translate(float64(s.Pos.X), float64(s.Pos.Y))
 	col := colorm.ColorM{}
 	col.Scale(1, 1, 1, alpha)
 	colorm.DrawImage(dst, s.Image, col, copts)
