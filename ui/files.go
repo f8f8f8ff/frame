@@ -2,10 +2,13 @@ package ui
 
 import (
 	"image"
+	_ "image/gif"
 	_ "image/jpeg"
 	_ "image/png"
 	"io/fs"
 	"log"
+
+	_ "golang.org/x/image/webp"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )
