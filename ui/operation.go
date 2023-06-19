@@ -120,6 +120,32 @@ func (op *MoveOp) Draw(dst *ebiten.Image) {
 	}
 }
 
+type DragOp struct {
+	moveOp  *MoveOp
+	Targets []*sprite.Sprite
+}
+
+func (op *DragOp) Update(ui *UI) (done bool, err error) {
+	if len(op.Targets) == 0 {
+		if MouseJustPressed(ebiten.MouseButtonLeft) {
+			s := ui.Canvas.SpriteAt(MousePos())
+			if s == nil {
+				return true, nil
+			}
+			op.Targets = append(op.Targets, s)
+		}
+		// return false, nil
+	}
+	op.moveOp = &MoveOp{
+		Targets: op.Targets,
+	}
+	// update once to update the drag on the same update
+	if done, _ := op.moveOp.Update(ui); !done {
+		ui.addOperation(op.moveOp)
+	}
+	return true, nil
+}
+
 type CropOp struct {
 	selOp   *SelectOp
 	drag    MouseDrag
@@ -262,30 +288,4 @@ func (op *FlatReshapeOp) Draw(dst *ebiten.Image) {
 		op.spr.DrawWithOps(dst, &opts, 1)
 	}
 	draw.StrokeRect(dst, op.drag2.Rect(), clr, 2, 2)
-}
-
-type DragOp struct {
-	moveOp  *MoveOp
-	Targets []*sprite.Sprite
-}
-
-func (op *DragOp) Update(ui *UI) (done bool, err error) {
-	if len(op.Targets) == 0 {
-		if MouseJustPressed(ebiten.MouseButtonLeft) {
-			s := ui.Canvas.SpriteAt(MousePos())
-			if s == nil {
-				return true, nil
-			}
-			op.Targets = append(op.Targets, s)
-		}
-		// return false, nil
-	}
-	op.moveOp = &MoveOp{
-		Targets: op.Targets,
-	}
-	// update once to update the drag on the same update
-	if done, _ := op.moveOp.Update(ui); !done {
-		ui.addOperation(op.moveOp)
-	}
-	return true, nil
 }
