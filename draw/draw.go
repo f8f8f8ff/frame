@@ -40,6 +40,21 @@ func ResizeOpts(src image.Rectangle, dst image.Rectangle) ebiten.DrawImageOption
 	return ReshapeOpts(src, dst)
 }
 
+func CropImage(src *ebiten.Image, r image.Rectangle, offset image.Point) (*ebiten.Image, image.Rectangle) {
+	r = r.Canon()
+	r = r.Add(offset)
+	if r.Dx() < 1 || r.Dy() < 1 {
+		return nil, r
+	}
+	if !r.Overlaps(src.Bounds()) {
+		return nil, r
+	}
+	intr := r.Intersect(src.Bounds())
+	im := src.SubImage(intr)
+	intr = intr.Sub(offset)
+	return ebiten.NewImageFromImage(im), intr
+}
+
 func DrawImage(dst, src *ebiten.Image, pos image.Point, alpha float64) {
 	opts := &colorm.DrawImageOptions{}
 	opts.GeoM.Translate(float64(pos.X), float64(pos.Y))

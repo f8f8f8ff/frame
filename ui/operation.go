@@ -127,3 +127,55 @@ func (op *MoveOp) Draw(dst *ebiten.Image) {
 		}
 	}
 }
+
+type CropOp struct {
+	selOp   *SelectOp
+	drag    MouseDrag
+	Targets []*sprite.Sprite
+}
+
+func (op *CropOp) Update(ui *UI) (done bool, err error) {
+	if len(op.Targets) == 0 {
+		if op.selOp == nil {
+			op.selOp = &SelectOp{clr: color.Black}
+			ui.addOperation(op.selOp)
+		}
+		if !op.selOp.done {
+			return false, nil
+		}
+		op.Targets = op.selOp.Targets
+		if len(op.Targets) == 0 {
+			return true, nil
+		}
+	}
+	op.drag.Update()
+	if !op.drag.Started {
+		return false, nil
+	}
+	log.Println("cropping", op.Targets)
+	if !op.drag.Released {
+		return false, nil
+	}
+	for _, sp := range op.Targets {
+		ui.Canvas.RemoveSprite(sp)
+		s := sp.Crop(op.drag.Rect())
+		if s == nil {
+			continue
+		}
+		ui.Canvas.AddSprite(s)
+	}
+	return true, nil
+}
+
+func (op *CropOp) Draw(dst *ebiten.Image) {
+	// TODO hover
+	clr := color.RGBA{0, 255, 0, 255}
+	for _, sp := range op.Targets {
+		// outline
+		draw.StrokeRect(dst, sp.Rect(), clr, 1, -1)
+	}
+	if !op.drag.Started {
+		return
+	}
+	draw.StrokeRect(dst, op.drag.Rect(), clr, 2, 0)
+}

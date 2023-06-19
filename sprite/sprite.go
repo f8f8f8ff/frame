@@ -70,6 +70,17 @@ func (s *Sprite) Copy() *Sprite {
 	}
 }
 
+func (s *Sprite) Crop(r image.Rectangle) *Sprite {
+	im, nr := draw.CropImage(s.Image, r, s.Pos.Mul(-1))
+	if im == nil {
+		return nil
+	}
+	return &Sprite{
+		Image: im,
+		Pos:   nr.Min,
+	}
+}
+
 // gives the sprite at position in SpriteList
 func SpriteAt(sp []*Sprite, p image.Point) *Sprite {
 	for i := len(sp) - 1; i >= 0; i-- {

@@ -27,6 +27,7 @@ func MainMenu() *Menu {
 	}{
 		{text: "nil", operation: nil},
 		{text: "move", operation: &MoveOp{}},
+		{text: "crop", operation: &CropOp{}},
 		{text: "select", operation: &SelectOp{clr: color.Black}},
 	}
 	r := image.Rectangle{}
