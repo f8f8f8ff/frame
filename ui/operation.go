@@ -17,10 +17,6 @@ type Drawable interface {
 	Draw(*ebiten.Image)
 }
 
-type RequiresSelection interface {
-	Select(*UI) (done, success bool)
-}
-
 type SelectOp struct {
 	clr     color.Color
 	drag    MouseDrag
@@ -77,20 +73,25 @@ func (op *SelectOp) Draw(dst *ebiten.Image) {
 }
 
 type MoveOp struct {
-	selOp *SelectOp
-	drag  MouseDrag
+	selOp    *SelectOp
+	drag     MouseDrag
+	Targets  []*sprite.Sprite
+	Selected bool
 }
 
 func (op *MoveOp) Update(ui *UI) (done bool, err error) {
-	if op.selOp == nil {
-		op.selOp = &SelectOp{clr: color.Black}
-		ui.addOperation(op.selOp)
-	}
-	if !op.selOp.done {
-		return false, nil
-	}
-	if len(op.selOp.Targets) == 0 {
-		return true, nil
+	if len(op.Targets) == 0 {
+		if op.selOp == nil {
+			op.selOp = &SelectOp{clr: color.Black}
+			ui.addOperation(op.selOp)
+		}
+		if !op.selOp.done {
+			return false, nil
+		}
+		op.Targets = op.selOp.Targets
+		if len(op.Targets) == 0 {
+			return true, nil
+		}
 	}
 	op.drag.Update()
 	if !op.drag.Started {
@@ -102,11 +103,11 @@ func (op *MoveOp) Update(ui *UI) (done bool, err error) {
 	// 	c.RemoveSprite(op.target)
 	// 	c.AddSprite(op.target)
 	// }
-	log.Println("dragging", op.selOp.Targets)
+	log.Println("dragging", op.Targets)
 	if !op.drag.Released {
 		return false, nil
 	}
-	for _, sp := range op.selOp.Targets {
+	for _, sp := range op.Targets {
 		sp.MoveBy(op.drag.Diff())
 	}
 	return true, nil
