@@ -19,10 +19,13 @@ func ResizeImage(src *ebiten.Image, size image.Rectangle) *ebiten.Image {
 func ReshapeOpts(src image.Rectangle, dst image.Rectangle) ebiten.DrawImageOptions {
 	src = src.Canon()
 	dst = dst.Canon()
+	if dst.Dy() < 1 || dst.Dx() < 1 {
+		return ebiten.DrawImageOptions{}
+	}
 	srcx, srcy := src.Dx(), src.Dy()
 	dstx, dsty := dst.Dx(), dst.Dy()
-	scalex := float64(srcx) / float64(dstx)
-	scaley := float64(srcy) / float64(dsty)
+	scalex := float64(dstx) / float64(srcx)
+	scaley := float64(dsty) / float64(srcy)
 	opt := ebiten.DrawImageOptions{}
 	opt.GeoM.Scale(scalex, scaley)
 
