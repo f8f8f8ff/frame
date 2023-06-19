@@ -9,9 +9,10 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
-func MainMenu() *Menu {
+func MainMenu(ui *UI) *Menu {
 	utilityMenuOps := []*MenuOption{
 		{text: "(un)lock order", operation: &LockOrderOp{}},
+		{text: "delete all", operation: &DeleteOp{Targets: ui.Canvas.Sprites()}},
 	}
 	utilityMenu := NewMenu(utilityMenuOps, ebiten.MouseButtonLeft)
 

@@ -48,7 +48,7 @@ func (ui *UI) Update() error {
 
 	if len(ui.operations) == 0 {
 		if MouseJustPressed(ebiten.MouseButtonRight) {
-			ui.addOperation(MainMenu())
+			ui.addOperation(MainMenu(ui))
 		}
 		if MouseJustPressed(ebiten.MouseButtonLeft) {
 			ui.addOperation(&DragOp{})
