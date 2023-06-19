@@ -9,45 +9,64 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
-type Menu struct {
-	options []*struct {
-		text      string
-		operation interface{}
-		*sprite.Sprite
-	}
-	mouseButton ebiten.MouseButton
-	rect        image.Rectangle
-}
-
 func MainMenu() *Menu {
-	options := []*struct {
-		text      string
-		operation interface{}
-		*sprite.Sprite
-	}{
+	utilityMenu := NewMenu([]*MenuOption{
+		{text: "(un)lock order", operation: &LockOrderOp{}},
+	}, ebiten.MouseButtonLeft)
+
+	options := []*MenuOption{
 		{text: "nil", operation: nil},
 		{text: "move", operation: &MoveOp{}},
 		{text: "crop", operation: &CropOp{}},
 		{text: "reshape", operation: &ReshapeOp{}},
 		{text: "liftshape", operation: &FlatReshapeOp{}},
 		{text: "delete", operation: &DeleteOp{}},
-		{text: "(un)lock order", operation: &LockOrderOp{}},
+		{text: "util", operation: utilityMenu},
 	}
-	r := image.Rectangle{}
-	r.Min = MousePos()
+	p := true
 	return &Menu{
-		options:     options,
-		mouseButton: ebiten.MouseButtonRight,
-		rect:        r,
+		options:      options,
+		mouseButton:  ebiten.MouseButtonRight,
+		startPressed: &p,
 	}
 }
 
+func NewMenu(opts []*MenuOption, button ebiten.MouseButton) *Menu {
+	return &Menu{
+		options:     opts,
+		mouseButton: button,
+	}
+}
+
+type MenuOption struct {
+	text      string
+	operation interface{}
+	*sprite.Sprite
+}
+
+type Menu struct {
+	options      []*MenuOption
+	mouseButton  ebiten.MouseButton
+	rect         *image.Rectangle
+	startPressed *bool
+}
+
 func (m *Menu) Update() (op interface{}, done bool) {
+	if m.rect == nil {
+		m.rect = &image.Rectangle{}
+		m.rect.Min = MousePos()
+	}
+	if m.startPressed == nil {
+		pressed := ebiten.IsMouseButtonPressed(m.mouseButton)
+		m.startPressed = &pressed
+	}
 	if m.options[0].Sprite == nil {
 		m.createOptionSprites()
 		return nil, false
 	}
-	if !MouseJustReleased(m.mouseButton) {
+	if *m.startPressed && !MouseJustReleased(m.mouseButton) {
+		return nil, false
+	} else if !*m.startPressed && !MouseJustPressed(m.mouseButton) {
 		return nil, false
 	}
 	for _, opt := range m.options {
@@ -86,6 +105,9 @@ func (m *Menu) createOptionSprites() {
 }
 
 func (m *Menu) Draw(dst *ebiten.Image) {
+	if m.rect == nil {
+		return
+	}
 	for _, opt := range m.options {
 		if opt.In(MousePos()) {
 			opt.DrawInverted(dst, image.Point{0, 0}, 1)
@@ -94,5 +116,5 @@ func (m *Menu) Draw(dst *ebiten.Image) {
 		opt.Draw(dst, image.Point{0, 0}, 1)
 	}
 	// outline menu, invert highlighed
-	draw.StrokeRect(dst, m.rect, color.Black, 2, 2)
+	draw.StrokeRect(dst, *m.rect, color.Black, 2, 2)
 }

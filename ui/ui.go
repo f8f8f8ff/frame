@@ -8,6 +8,7 @@ import (
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
+	"github.com/hajimehoshi/ebiten/v2/inpututil"
 
 	"frame/canvas"
 )
@@ -63,6 +64,10 @@ func (ui *UI) HandleOperations() (err error) {
 		}
 		switch op := ope.(type) {
 		case *Menu:
+			if inpututil.IsKeyJustPressed(ebiten.KeyEscape) {
+				ui.removeOperation(op)
+				continue
+			}
 			if o, done := op.Update(); done {
 				ui.removeOperation(op)
 				ui.addOperation(o)
