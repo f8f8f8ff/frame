@@ -17,6 +17,29 @@ type Drawable interface {
 	Draw(*ebiten.Image)
 }
 
+// definies how to repeat an operation
+func CopyOp(op Operation) Operation {
+	switch op := op.(type) {
+	case *SelectOp:
+		return &SelectOp{clr: op.clr}
+	case *MoveOp:
+		return &MoveOp{}
+	case *DragOp:
+		return &DragOp{}
+	case *CropOp:
+		return &CropOp{}
+	case *ReshapeOp:
+		return &ReshapeOp{}
+	case *FlatReshapeOp:
+		return &FlatReshapeOp{}
+	case *DeleteOp:
+		return &DeleteOp{}
+	case *LockOrderOp:
+		return &LockOrderOp{}
+	}
+	return nil
+}
+
 type SelectOp struct {
 	clr     color.Color
 	drag    MouseDrag

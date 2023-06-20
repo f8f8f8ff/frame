@@ -24,6 +24,7 @@ type UI struct {
 
 	operations []interface{}
 	LockOrder  bool
+	lastOp     Operation
 }
 
 func NewUI(w, h int) *UI {
@@ -49,9 +50,11 @@ func (ui *UI) Update() error {
 	if len(ui.operations) == 0 {
 		if MouseJustPressed(ebiten.MouseButtonRight) {
 			ui.addOperation(MainMenu(ui))
-		}
-		if MouseJustPressed(ebiten.MouseButtonLeft) {
+		} else if MouseJustPressed(ebiten.MouseButtonLeft) {
 			ui.addOperation(&DragOp{})
+		} else if inpututil.IsKeyJustPressed(ebiten.KeySpace) {
+			ui.addOperation(ui.lastOp)
+			ui.lastOp = CopyOp(ui.lastOp)
 		}
 	}
 	ui.HandleOperations()
@@ -72,11 +75,14 @@ func (ui *UI) HandleOperations() (err error) {
 				ui.removeOperation(op)
 				continue
 			}
-			if o, done := op.Update(); done {
+			if done, e := op.Update(ui); done {
+				err = e
 				ui.removeOperation(op)
-				ui.addOperation(o)
+				ui.addOperation(op.result)
+				ui.lastOp = CopyOp(op.result)
 			}
 		case Operation:
+			log.Printf("%T\n", op)
 			if CancelInput() {
 				ui.operations = []interface{}{}
 			}
@@ -120,6 +126,7 @@ func (ui *UI) Draw(screen *ebiten.Image) {
 			msg += fmt.Sprintf("%T %v\n", o, o)
 		}
 	}
+	msg += fmt.Sprintf("%T %v", ui.lastOp, ui.lastOp)
 	ebitenutil.DebugPrint(screen, msg)
 }
 

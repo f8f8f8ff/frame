@@ -42,7 +42,7 @@ func NewMenu(opts []*MenuOption, button ebiten.MouseButton) *Menu {
 
 type MenuOption struct {
 	text      string
-	operation interface{}
+	operation Operation
 	*sprite.Sprite
 }
 
@@ -51,9 +51,10 @@ type Menu struct {
 	mouseButton  ebiten.MouseButton
 	rect         *image.Rectangle
 	startPressed *bool
+	result       Operation
 }
 
-func (m *Menu) Update() (op interface{}, done bool) {
+func (m *Menu) Update(ui *UI) (done bool, err error) {
 	if m.rect == nil {
 		m.rect = &image.Rectangle{}
 		m.rect.Min = MousePos()
@@ -64,19 +65,20 @@ func (m *Menu) Update() (op interface{}, done bool) {
 	}
 	if m.options[0].Sprite == nil {
 		m.createOptionSprites()
-		return nil, false
+		return false, nil
 	}
 	if *m.startPressed && !MouseJustReleased(m.mouseButton) {
-		return nil, false
+		return false, nil
 	} else if !*m.startPressed && !MouseJustPressed(m.mouseButton) {
-		return nil, false
+		return false, nil
 	}
 	for _, opt := range m.options {
 		if opt.In(MousePos()) {
-			return opt.operation, true
+			m.result = opt.operation
+			return true, nil
 		}
 	}
-	return nil, true
+	return true, nil
 }
 
 func (m *Menu) createOptionSprites() {
