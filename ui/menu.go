@@ -23,6 +23,7 @@ func MainMenu(ui *UI) *Menu {
 		{text: "reshape", operation: &ReshapeOp{}},
 		{text: "liftshape", operation: &FlatReshapeOp{}},
 		{text: "delete", operation: &DeleteOp{}},
+		{text: "text", operation: &TextOp{}},
 		{text: "util", operation: utilityMenu},
 	}
 	p := true

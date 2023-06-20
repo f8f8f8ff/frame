@@ -36,6 +36,8 @@ func CopyOp(op Operation) Operation {
 		return &DeleteOp{}
 	case *LockOrderOp:
 		return &LockOrderOp{}
+	case *TextOp:
+		return &TextOp{}
 	}
 	return nil
 }
@@ -358,4 +360,56 @@ func (op LockOrderOp) String() string { return "(un)lock order" }
 func (op *LockOrderOp) Update(ui *UI) (done bool, err error) {
 	ui.LockOrder = !ui.LockOrder
 	return true, nil
+}
+
+type TextOp struct {
+	text    string
+	spr     *sprite.Sprite
+	pos     image.Point
+	counter int
+}
+
+func (op TextOp) String() string { return "text" }
+
+func (op *TextOp) Update(ui *UI) (done bool, err error) {
+	ebiten.SetCursorMode(ebiten.CursorModeHidden)
+	op.pos = MousePos()
+	if op.spr == nil {
+		op.spr = &sprite.Sprite{
+			Pos: op.pos,
+		}
+	}
+	op.spr.Pos = op.pos
+	// update string
+	op.text = string(ebiten.AppendInputChars([]rune(op.text)))
+	if repeatingKeyPressed(ebiten.KeyEnter) {
+		op.text += "\n"
+	}
+	if repeatingKeyPressed(ebiten.KeyTab) {
+		op.text += "    "
+	}
+	if repeatingKeyPressed(ebiten.KeyBackspace) {
+		if len(op.text) >= 1 {
+			op.text = op.text[:len(op.text)-1]
+		}
+	}
+	t := op.text
+	if op.counter%60 < 30 {
+		t += "_"
+	}
+	op.counter++
+	im := draw.NewTextBlockImage(t, draw.Font, 5, color.Black, color.Transparent)
+	op.spr.Image = im
+	if !MouseJustPressed(ebiten.MouseButtonLeft) {
+		return false, nil
+	}
+	ui.Canvas.AddSprite(op.spr)
+	return true, nil
+}
+
+func (op *TextOp) Draw(dst *ebiten.Image) {
+	if op.spr != nil {
+		op.spr.Draw(dst, image.Point{}, 1)
+		// draw.StrokeRect(dst, op.spr.Rect(), color.Black, 1, 1)
+	}
 }

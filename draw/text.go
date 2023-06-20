@@ -38,8 +38,21 @@ func BoundString(face font.Face, txt string) image.Rectangle {
 }
 
 func NewTextImage(txt string, face font.Face, r image.Rectangle, padding int, fg color.Color, bg color.Color) *ebiten.Image {
+	if r.Dx() == 0 || r.Dy() == 0 {
+		return nil
+	}
 	img := ebiten.NewImage(r.Dx(), r.Dy())
 	img.Fill(bg)
 	text.Draw(img, txt, face, padding, r.Dy()-padding, fg)
+	return img
+}
+
+func NewTextBlockImage(txt string, face font.Face, padding int, fg color.Color, bg color.Color) *ebiten.Image {
+	r := BoundString(face, txt)
+	// r = r.Sub(r.Min)
+	r = image.Rect(0, 0, r.Dx()+2*padding, r.Dy()+2*padding)
+	img := ebiten.NewImage(r.Dx(), r.Dy())
+	img.Fill(bg)
+	text.Draw(img, txt, face, padding, face.Metrics().Height.Ceil(), fg)
 	return img
 }

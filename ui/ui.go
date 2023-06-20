@@ -64,6 +64,9 @@ func (ui *UI) Update() error {
 }
 
 func (ui *UI) HandleOperations() (err error) {
+	if len(ui.operations) == 0 {
+		ebiten.SetCursorMode(ebiten.CursorModeVisible)
+	}
 	for _, ope := range ui.operations {
 		if ope == nil {
 			ui.removeOperation(ope)

@@ -39,6 +39,9 @@ func (s Sprite) Rect() image.Rectangle {
 
 // draws sprite, dv is a position offset
 func (s Sprite) Draw(dst *ebiten.Image, dv image.Point, alpha float64) {
+	if s.Image == nil {
+		return
+	}
 	draw.DrawImage(dst, s.Image, s.Pos.Add(dv), alpha)
 }
 
