@@ -38,6 +38,8 @@ func CopyOp(op Operation) Operation {
 		return &LockOrderOp{}
 	case *TextOp:
 		return &TextOp{}
+	case *InvertOp:
+		return &InvertOp{}
 	}
 	return nil
 }
@@ -412,4 +414,31 @@ func (op *TextOp) Draw(dst *ebiten.Image) {
 		op.spr.Draw(dst, image.Point{}, 1)
 		// draw.StrokeRect(dst, op.spr.Rect(), color.Black, 1, 1)
 	}
+}
+
+type InvertOp struct {
+	selOp   *SelectOp
+	Targets []*sprite.Sprite
+}
+
+func (op InvertOp) String() string { return "invert" }
+
+func (op *InvertOp) Update(ui *UI) (done bool, err error) {
+	if len(op.Targets) == 0 {
+		if op.selOp == nil {
+			op.selOp = &SelectOp{clr: color.RGBA{0, 0, 0, 255}}
+			ui.addOperation(op.selOp)
+		}
+		if !op.selOp.done {
+			return false, nil
+		}
+		op.Targets = op.selOp.Targets
+		if len(op.Targets) == 0 {
+			return true, nil
+		}
+	}
+	for _, sp := range op.Targets {
+		sp.Image = draw.InvertImage(sp.Image)
+	}
+	return true, nil
 }
