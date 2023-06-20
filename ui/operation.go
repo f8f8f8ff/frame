@@ -48,6 +48,8 @@ type SelectOp struct {
 	done    bool
 }
 
+func (op SelectOp) String() string { return "select" }
+
 func (op *SelectOp) Update(ui *UI) (done bool, err error) {
 	op.drag.Update()
 	if !op.drag.Started {
@@ -105,6 +107,8 @@ type MoveOp struct {
 	Targets []*sprite.Sprite
 }
 
+func (op MoveOp) String() string { return "move" }
+
 func (op *MoveOp) Update(ui *UI) (done bool, err error) {
 	if len(op.Targets) == 0 {
 		if op.selOp == nil {
@@ -150,6 +154,8 @@ type DragOp struct {
 	Targets []*sprite.Sprite
 }
 
+func (op DragOp) String() string { return "drag" }
+
 func (op *DragOp) Update(ui *UI) (done bool, err error) {
 	if len(op.Targets) == 0 {
 		if MouseJustPressed(ebiten.MouseButtonLeft) {
@@ -176,6 +182,8 @@ type CropOp struct {
 	drag    MouseDrag
 	Targets []*sprite.Sprite
 }
+
+func (op CropOp) String() string { return "crop" }
 
 func (op *CropOp) Update(ui *UI) (done bool, err error) {
 	if len(op.Targets) == 0 {
@@ -222,6 +230,8 @@ type ReshapeOp struct {
 	Target *sprite.Sprite
 }
 
+func (op ReshapeOp) String() string { return "reshape" }
+
 func (op *ReshapeOp) Update(ui *UI) (done bool, err error) {
 	if op.Target == nil {
 		if MouseJustPressed(ebiten.MouseButtonLeft) {
@@ -264,6 +274,8 @@ type FlatReshapeOp struct {
 	drag2 MouseDrag
 	spr   *sprite.Sprite
 }
+
+func (op FlatReshapeOp) String() string { return "liftshape" }
 
 func (op *FlatReshapeOp) Update(ui *UI) (done bool, err error) {
 	if !op.drag.Update() {
@@ -317,6 +329,8 @@ type DeleteOp struct {
 	Targets []*sprite.Sprite
 }
 
+func (op DeleteOp) String() string { return "delete" }
+
 func (op *DeleteOp) Update(ui *UI) (done bool, err error) {
 	if len(op.Targets) == 0 {
 		if op.selOp == nil {
@@ -338,6 +352,8 @@ func (op *DeleteOp) Update(ui *UI) (done bool, err error) {
 }
 
 type LockOrderOp struct{}
+
+func (op LockOrderOp) String() string { return "(un)lock order" }
 
 func (op *LockOrderOp) Update(ui *UI) (done bool, err error) {
 	ui.LockOrder = !ui.LockOrder

@@ -91,7 +91,7 @@ func (ui *UI) HandleOperations() (err error) {
 				err = e
 			}
 		default:
-			log.Printf("unhandled operation: %T %v", op, op)
+			log.Printf("unhandled operation: %T %#v", op, op)
 			ui.removeOperation(op)
 		}
 	}
@@ -123,10 +123,10 @@ func (ui *UI) Draw(screen *ebiten.Image) {
 	msg := fmt.Sprintf("%0.f\n", ebiten.ActualFPS())
 	if len(ui.operations) > 0 {
 		for _, o := range ui.operations {
-			msg += fmt.Sprintf("%T %v\n", o, o)
+			msg += fmt.Sprintf("%v %#v\n", o, o)
 		}
 	}
-	msg += fmt.Sprintf("%T %v", ui.lastOp, ui.lastOp)
+	msg += fmt.Sprintf("%v %#v\n", ui.lastOp, ui.lastOp)
 	ebitenutil.DebugPrint(screen, msg)
 }
 

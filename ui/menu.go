@@ -1,6 +1,7 @@
 package ui
 
 import (
+	"fmt"
 	"frame/draw"
 	"frame/sprite"
 	"image"
@@ -15,9 +16,8 @@ func MainMenu(ui *UI) *Menu {
 		{text: "delete all", operation: &DeleteOp{Targets: ui.Canvas.Sprites()}},
 	}
 	utilityMenu := NewMenu(utilityMenuOps, ebiten.MouseButtonLeft)
-
 	options := []*MenuOption{
-		{text: "nil", operation: nil},
+		RepeatMenuOption(ui.lastOp),
 		{text: "move", operation: &MoveOp{}},
 		{text: "crop", operation: &CropOp{}},
 		{text: "reshape", operation: &ReshapeOp{}},
@@ -30,6 +30,14 @@ func MainMenu(ui *UI) *Menu {
 		options:      options,
 		mouseButton:  ebiten.MouseButtonRight,
 		startPressed: &p,
+	}
+}
+
+func RepeatMenuOption(op Operation) *MenuOption {
+	name := fmt.Sprintf("(%v)", op)
+	return &MenuOption{
+		text:      name,
+		operation: op,
 	}
 }
 
