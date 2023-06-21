@@ -324,6 +324,43 @@ func (op *FlatReshapeOp) Draw(dst *ebiten.Image) {
 	draw.StrokeRect(dst, op.drag2.Rect(), clr, 2, -2)
 }
 
+type FlattenOp struct {
+	drag MouseDrag
+	spr  *sprite.Sprite
+}
+
+func (op FlattenOp) String() string { return "liftshape" }
+
+func (op *FlattenOp) Update(ui *UI) (done bool, err error) {
+	if !op.drag.Update() {
+		return false, nil
+	}
+	if !op.drag.Moved() {
+		return true, nil
+	}
+
+	if op.spr == nil {
+		im, r := draw.CropImage(ui.Canvas.Image(), op.drag.Rect(), image.Point{0, 0})
+		if im == nil {
+			return true, nil // error
+		}
+		op.spr = &sprite.Sprite{
+			Image: im,
+			Pos:   r.Min,
+		}
+	}
+	ui.Canvas.AddSprite(op.spr)
+	return true, nil
+}
+
+func (op *FlattenOp) Draw(dst *ebiten.Image) {
+	clr := color.RGBA{0, 0, 255, 255}
+	if !op.drag.Started {
+		return
+	}
+	draw.StrokeRect(dst, op.drag.Rect(), clr, 1, 1)
+}
+
 type DeleteOp struct {
 	selOp   *SelectOp
 	Targets []*sprite.Sprite
