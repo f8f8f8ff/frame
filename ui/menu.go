@@ -11,9 +11,16 @@ import (
 )
 
 func MainMenu(ui *UI) *Menu {
+	reorderMenuOps := []*MenuOption{
+		{text: "bring to front", operation: &ReorderOp{command: sprite.ReorderBringToFront}},
+		{text: "send to back", operation: &ReorderOp{command: sprite.ReorderSendToBack}},
+		{text: "bring forwards", operation: &ReorderOp{command: sprite.ReorderBringForwards}},
+		{text: "send backwards", operation: &ReorderOp{command: sprite.ReorderSendBackwards}},
+	}
+	reorderMenu := NewMenu(reorderMenuOps, ebiten.MouseButtonLeft)
 	utilityMenuOps := []*MenuOption{
 		{text: "(un)lock order", operation: &LockOrderOp{}},
-		{text: "delete all", operation: &DeleteOp{Targets: ui.Canvas.Sprites()}},
+		{text: "delete all", operation: &DeleteOp{Targets: ui.Canvas.GetSprites()}},
 	}
 	utilityMenu := NewMenu(utilityMenuOps, ebiten.MouseButtonLeft)
 	options := []*MenuOption{
@@ -23,6 +30,7 @@ func MainMenu(ui *UI) *Menu {
 		{text: "reshape", operation: &ReshapeOp{}},
 		{text: "flatten", operation: &FlattenOp{}},
 		{text: "delete", operation: &DeleteOp{}},
+		{text: "reorder", operation: reorderMenu},
 		{text: "util", operation: utilityMenu},
 	}
 	p := true

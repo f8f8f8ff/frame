@@ -82,7 +82,7 @@ func (op *SelectOp) Update(ui *UI) (done bool, err error) {
 		return false, nil
 	}
 	op.Targets = []*sprite.Sprite{}
-	for _, sp := range c.Sprites() {
+	for _, sp := range c.GetSprites() {
 		if sp.Overlaps(op.drag.Rect()) {
 			op.Targets = append(op.Targets, sp)
 		}
@@ -398,4 +398,59 @@ func (op LockOrderOp) String() string { return "(un)lock order" }
 func (op *LockOrderOp) Update(ui *UI) (done bool, err error) {
 	ui.LockOrder = !ui.LockOrder
 	return true, nil
+}
+
+type ReorderOp struct {
+	selOp   *SingleSelectOp
+	target  *sprite.Sprite
+	command sprite.ReorderCommand
+}
+
+func (op ReorderOp) String() string { return "reorder" }
+
+func (op *ReorderOp) Update(ui *UI) (done bool, err error) {
+	if op.command == sprite.ReorderNone {
+		return true, nil
+	}
+	if op.target == nil {
+		if op.selOp == nil {
+			op.selOp = &SingleSelectOp{}
+			ui.addOperation(op.selOp)
+		}
+		if !op.selOp.done {
+			return false, nil
+		}
+		if op.selOp.target == nil {
+			return true, nil
+		}
+		op.target = op.selOp.target
+	}
+	ui.Canvas.Reorder(op.command, op.target)
+	return true, nil
+}
+
+type SingleSelectOp struct {
+	target *sprite.Sprite
+	done   bool
+	clr    color.Color
+}
+
+func (op SingleSelectOp) String() string { return "select(single)" }
+
+func (op *SingleSelectOp) Update(ui *UI) (done bool, err error) {
+	if op.clr == nil {
+		op.clr = color.Black
+	}
+	op.target = ui.Canvas.SpriteAt(MousePos())
+	if MouseJustPressed(ebiten.MouseButtonLeft) {
+		op.done = true
+		return true, nil
+	}
+	return false, nil
+}
+
+func (op *SingleSelectOp) Draw(dst *ebiten.Image) {
+	if op.target != nil {
+		op.target.Outline(dst, op.clr, 1, -1)
+	}
 }

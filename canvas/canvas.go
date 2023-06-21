@@ -13,7 +13,7 @@ type Canvas struct {
 	Width   int
 	Height  int
 	image   *ebiten.Image
-	sprites []*sprite.Sprite
+	Sprites sprite.SpriteList
 
 	cursor  image.Point
 	pressed bool
@@ -25,7 +25,7 @@ func NewCanvas(width, height int) *Canvas {
 		Width:   width,
 		Height:  height,
 		image:   i,
-		sprites: []*sprite.Sprite{},
+		Sprites: []*sprite.Sprite{},
 		cursor:  image.Point{},
 		pressed: false,
 	}
@@ -39,7 +39,8 @@ func (c *Canvas) Resize(width, height int) {
 
 func (c *Canvas) DrawSprites() {
 	c.image.Fill(color.Transparent)
-	for _, s := range c.sprites {
+	for i := len(c.Sprites) - 1; i >= 0; i-- {
+		s := c.Sprites[i]
 		s.Draw(c.image, image.Point{0, 0}, 1)
 	}
 }
@@ -49,7 +50,7 @@ func (c Canvas) Image() *ebiten.Image {
 }
 
 func (c *Canvas) AddSprite(s *sprite.Sprite) {
-	c.sprites = append(c.sprites, s)
+	c.Sprites = append(sprite.SpriteList{s}, c.Sprites...)
 }
 
 func (c *Canvas) RemoveSprite(s *sprite.Sprite) {
@@ -57,7 +58,7 @@ func (c *Canvas) RemoveSprite(s *sprite.Sprite) {
 		return
 	}
 	index := -1
-	for i, ss := range c.sprites {
+	for i, ss := range c.Sprites {
 		if ss == s {
 			index = i
 			break
@@ -66,7 +67,7 @@ func (c *Canvas) RemoveSprite(s *sprite.Sprite) {
 	if index == -1 {
 		return
 	}
-	c.sprites = append(c.sprites[:index], c.sprites[index+1:]...)
+	c.Sprites = append(c.Sprites[:index], c.Sprites[index+1:]...)
 }
 
 func (c *Canvas) AddImage(img image.Image) {
@@ -79,11 +80,16 @@ func (c *Canvas) AddImage(img image.Image) {
 }
 
 func (c *Canvas) SpriteAt(p image.Point) *sprite.Sprite {
-	return sprite.SpriteAt(c.sprites, p)
+	return sprite.SpriteAt(c.Sprites, p)
 }
 
-func (c Canvas) Sprites() []*sprite.Sprite {
-	return c.sprites
+func (c Canvas) GetSprites() []*sprite.Sprite {
+	return c.Sprites
+}
+
+func (c *Canvas) Reorder(command sprite.ReorderCommand, s *sprite.Sprite) {
+	newList := c.Sprites.Reorder(command, s)
+	c.Sprites = newList
 }
 
 func (c *Canvas) NewSpriteFromRegion(r image.Rectangle) *sprite.Sprite {

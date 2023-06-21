@@ -4,6 +4,7 @@ import (
 	"frame/draw"
 	"image"
 	"image/color"
+	"log"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/colorm"
@@ -101,8 +102,13 @@ func (s Sprite) Outline(dst *ebiten.Image, clr color.Color, strokeWidth, offset 
 
 // gives the sprite at position in SpriteList
 func SpriteAt(sp []*Sprite, p image.Point) *Sprite {
-	for i := len(sp) - 1; i >= 0; i-- {
-		s := sp[i]
+	// for i := len(sp) - 1; i >= 0; i-- {
+	// 	s := sp[i]
+	// 	if s.In(p) {
+	// 		return s
+	// 	}
+	// }
+	for _, s := range sp {
 		if s.In(p) {
 			return s
 		}
@@ -111,6 +117,33 @@ func SpriteAt(sp []*Sprite, p image.Point) *Sprite {
 }
 
 type SpriteList []*Sprite
+
+type ReorderCommand int
+
+const (
+	ReorderNone ReorderCommand = iota
+	ReorderBringForwards
+	ReorderSendBackwards
+	ReorderBringToFront
+	ReorderSendToBack
+)
+
+func (list SpriteList) Reorder(command ReorderCommand, s *Sprite) SpriteList {
+	log.Println(list)
+	l := SpriteList{}
+	switch command {
+	case ReorderBringForwards:
+		l = list.BringForwards(s)
+	case ReorderSendBackwards:
+		l = list.SendBackwards(s)
+	case ReorderBringToFront:
+		l = list.BringToFront(s)
+	case ReorderSendToBack:
+		l = list.SendToBack(s)
+	}
+	log.Println(l)
+	return l
+}
 
 func (list SpriteList) BringForwards(s *Sprite) SpriteList {
 	i := list.IndexOf(s)
