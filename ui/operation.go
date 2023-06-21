@@ -101,6 +101,49 @@ func (op *SelectOp) Draw(dst *ebiten.Image) {
 	draw.StrokeRect(dst, op.drag.Rect(), op.clr, 1, 0)
 }
 
+type SelectSprOrRectOp struct {
+	clr      color.Color
+	selDrag  MouseDrag
+	target   *sprite.Sprite
+	rect     image.Rectangle
+	done     bool
+	isSprite bool
+}
+
+func (op SelectSprOrRectOp) String() string { return "select sprite or rect" }
+
+func (op *SelectSprOrRectOp) Update(ui *UI) (done bool, err error) {
+	op.selDrag.Update()
+	op.target = ui.Canvas.SpriteAt(MousePos())
+	if !op.selDrag.Started {
+		return false, nil
+	}
+	if !op.selDrag.Released {
+		return false, nil
+	}
+	op.done = true
+	if op.selDrag.Moved() {
+		op.target = nil
+		op.isSprite = false
+		op.rect = op.selDrag.Rect()
+		return true, nil
+	}
+	op.target = ui.Canvas.SpriteAt(op.selDrag.End)
+	op.isSprite = true
+	return true, nil
+}
+
+func (op *SelectSprOrRectOp) Draw(dst *ebiten.Image) {
+	if !op.selDrag.Started {
+		if op.target != nil {
+			op.target.Outline(dst, op.clr, 1, -1)
+		}
+	}
+	if op.selDrag.Moved() {
+		draw.StrokeRect(dst, op.selDrag.Rect(), op.clr, 1, 0)
+	}
+}
+
 type MoveOp struct {
 	selOp   *SelectOp
 	drag    MouseDrag
