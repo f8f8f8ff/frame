@@ -54,6 +54,9 @@ func (e *MouseDrag) Diff() image.Point {
 }
 
 func (e *MouseDrag) Moved() bool {
+	if !e.Started {
+		return false
+	}
 	const moveThreshold int = 2
 	r := e.Rect().Canon()
 	if r.Dx() < moveThreshold || r.Dy() < moveThreshold {
