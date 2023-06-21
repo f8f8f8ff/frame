@@ -82,7 +82,10 @@ func (ui *UI) HandleOperations() (err error) {
 				err = e
 				ui.removeOperation(op)
 				ui.addOperation(op.result)
-				ui.lastOp = CopyOp(op.result)
+				c := CopyOp(op.result)
+				if c != nil {
+					ui.lastOp = c
+				}
 			}
 		case Operation:
 			// log.Printf("%T\n", op)
