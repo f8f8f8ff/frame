@@ -134,6 +134,9 @@ func (op *SelectSprOrRectOp) Update(ui *UI) (done bool, err error) {
 }
 
 func (op *SelectSprOrRectOp) Draw(dst *ebiten.Image) {
+	if op.clr == nil {
+		op.clr = color.Black
+	}
 	if !op.selDrag.Started {
 		if op.target != nil {
 			op.target.Outline(dst, op.clr, 1, -1)
@@ -269,30 +272,44 @@ func (op *CropOp) Draw(dst *ebiten.Image) {
 }
 
 type ReshapeOp struct {
-	drag   MouseDrag
-	Target *sprite.Sprite
+	sprOrRect *SelectSprOrRectOp
+	dstDrag   MouseDrag
+	Target    *sprite.Sprite
 }
 
 func (op ReshapeOp) String() string { return "reshape" }
 
 func (op *ReshapeOp) Update(ui *UI) (done bool, err error) {
 	if op.Target == nil {
-		if MouseJustPressed(ebiten.MouseButtonLeft) {
-			s := ui.Canvas.SpriteAt(MousePos())
-			if s == nil {
+		if op.sprOrRect == nil {
+			op.sprOrRect = &SelectSprOrRectOp{clr: color.RGBA{0, 0, 255, 255}}
+			ui.addOperation(op.sprOrRect)
+			return false, nil
+		}
+		if !op.sprOrRect.done {
+			return false, nil
+		}
+		if op.sprOrRect.isSprite {
+			op.Target = op.sprOrRect.target
+			if op.Target == nil {
 				return true, nil
 			}
-			op.Target = s
+			return false, nil
 		}
+		s := ui.Canvas.NewSpriteFromRegion(op.sprOrRect.rect)
+		if s == nil {
+			return true, nil
+		}
+		op.Target = s
+		ui.Canvas.AddSprite(s)
+	}
+	if !op.dstDrag.Update() {
 		return false, nil
 	}
-	if !op.drag.Update() {
-		return false, nil
-	}
-	if !op.drag.Moved() {
+	if !op.dstDrag.Moved() {
 		return true, nil
 	}
-	op.Target.Reshape(op.drag.Rect())
+	op.Target.Reshape(op.dstDrag.Rect())
 	return true, nil
 }
 
@@ -302,14 +319,14 @@ func (op *ReshapeOp) Draw(dst *ebiten.Image) {
 		// outline
 		draw.StrokeRect(dst, op.Target.Rect(), clr, 1, -1)
 	}
-	if !op.drag.Started {
+	if !op.dstDrag.Started {
 		return
 	}
-	if op.drag.Moved() {
-		opts := draw.ReshapeOpts(op.Target.Rect(), op.drag.Rect())
+	if op.dstDrag.Moved() {
+		opts := draw.ReshapeOpts(op.Target.Rect(), op.dstDrag.Rect())
 		op.Target.DrawWithOps(dst, &opts, 1)
 	}
-	draw.StrokeRect(dst, op.drag.Rect(), clr, 2, -2)
+	draw.StrokeRect(dst, op.dstDrag.Rect(), clr, 2, -2)
 }
 
 type FlatReshapeOp struct {
@@ -365,6 +382,7 @@ func (op *FlatReshapeOp) Draw(dst *ebiten.Image) {
 
 type FlattenOp struct {
 	drag MouseDrag
+	rect image.Rectangle
 	spr  *sprite.Sprite
 	done bool
 }
@@ -372,23 +390,18 @@ type FlattenOp struct {
 func (op FlattenOp) String() string { return "liftshape" }
 
 func (op *FlattenOp) Update(ui *UI) (done bool, err error) {
-	if !op.drag.Update() {
-		return false, nil
+	if op.rect.Empty() {
+		if !op.drag.Update() {
+			return false, nil
+		}
+		op.done = true
+		if !op.drag.Moved() {
+			return true, nil
+		}
+		op.rect = op.drag.Rect()
 	}
-	op.done = true
-	if !op.drag.Moved() {
-		return true, nil
-	}
-
 	if op.spr == nil {
-		im, r := draw.CropImage(ui.Canvas.Image(), op.drag.Rect(), image.Point{0, 0})
-		if im == nil {
-			return true, nil // error
-		}
-		op.spr = &sprite.Sprite{
-			Image: im,
-			Pos:   r.Min,
-		}
+		op.spr = ui.Canvas.NewSpriteFromRegion(op.rect)
 	}
 	ui.Canvas.AddSprite(op.spr)
 	return true, nil

@@ -1,6 +1,7 @@
 package canvas
 
 import (
+	"frame/draw"
 	"frame/sprite"
 	"image"
 	"image/color"
@@ -83,4 +84,15 @@ func (c *Canvas) SpriteAt(p image.Point) *sprite.Sprite {
 
 func (c Canvas) Sprites() []*sprite.Sprite {
 	return c.sprites
+}
+
+func (c *Canvas) NewSpriteFromRegion(r image.Rectangle) *sprite.Sprite {
+	im, r := draw.CropImage(c.image, r, image.Point{0, 0})
+	if im == nil {
+		return nil
+	}
+	return &sprite.Sprite{
+		Image: im,
+		Pos:   r.Min,
+	}
 }
