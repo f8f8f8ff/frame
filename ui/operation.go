@@ -252,12 +252,13 @@ func (op *CropOp) Update(ui *UI) (done bool, err error) {
 		return false, nil
 	}
 	for _, sp := range op.Targets {
-		ui.Canvas.RemoveSprite(sp)
+		i := ui.Canvas.Sprites.IndexOf(sp)
 		s := sp.Crop(op.drag.Rect())
 		if s == nil {
+			ui.Canvas.RemoveSprite(sp)
 			continue
 		}
-		ui.Canvas.AddSprite(s)
+		ui.Canvas.Sprites[i] = s
 	}
 	return true, nil
 }
