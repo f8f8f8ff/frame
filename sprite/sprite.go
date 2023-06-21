@@ -110,6 +110,64 @@ func SpriteAt(sp []*Sprite, p image.Point) *Sprite {
 	return nil
 }
 
+type SpriteList []*Sprite
+
+func (list SpriteList) BringForwards(s *Sprite) SpriteList {
+	i := list.IndexOf(s)
+	if i <= 0 {
+		return list
+	}
+	list[i] = list[i-1]
+	list[i-1] = s
+	return list
+}
+
+func (list SpriteList) BringToFront(s *Sprite) SpriteList {
+	list = list.Remove(s)
+	list = append(SpriteList{s}, list...)
+	return list
+}
+
+func (list SpriteList) SendBackwards(s *Sprite) SpriteList {
+	i := list.IndexOf(s)
+	if i == -1 {
+		return list
+	}
+	if i == len(list)-1 {
+		return list
+	}
+	list[i] = list[i+1]
+	list[i+1] = s
+	return list
+}
+
+func (list SpriteList) SendToBack(s *Sprite) SpriteList {
+	list = list.Remove(s)
+	list = append(list, s)
+	return list
+}
+
+func (list SpriteList) Remove(s *Sprite) SpriteList {
+	i := list.IndexOf(s)
+	if i == -1 {
+		return list
+	}
+	list = append(list[:i], list[i+1:]...)
+	return list
+}
+
+// returns index of s in list. -1 if not found
+func (list SpriteList) IndexOf(s *Sprite) int {
+	index := -1
+	for i, ss := range list {
+		if ss == s {
+			index = i
+			break
+		}
+	}
+	return index
+}
+
 // func (s *Sprite) Crop(r image.Rectangle) (newSprite *Sprite) {
 // 	x := r.Min.X - s.x
 // 	y := r.Min.Y - s.y
