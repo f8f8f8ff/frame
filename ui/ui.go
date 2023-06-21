@@ -85,7 +85,7 @@ func (ui *UI) HandleOperations() (err error) {
 				ui.lastOp = CopyOp(op.result)
 			}
 		case Operation:
-			log.Printf("%T\n", op)
+			// log.Printf("%T\n", op)
 			if CancelInput() {
 				ui.operations = []interface{}{}
 			}
@@ -129,7 +129,8 @@ func (ui *UI) Draw(screen *ebiten.Image) {
 			msg += fmt.Sprintf("%v %#v\n", o, o)
 		}
 	}
-	msg += fmt.Sprintf("%v %#v\n", ui.lastOp, ui.lastOp)
+	msg += fmt.Sprintf("lastOp %v\n", ui.lastOp)
+	msg += fmt.Sprintf("Sprites: %v", ui.Canvas.Sprites)
 	ebitenutil.DebugPrint(screen, msg)
 }
 
