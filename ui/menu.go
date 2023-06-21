@@ -21,7 +21,6 @@ func MainMenu(ui *UI) *Menu {
 		{text: "move", operation: &MoveOp{}},
 		{text: "crop", operation: &CropOp{}},
 		{text: "reshape", operation: &ReshapeOp{}},
-		{text: "liftshape", operation: &FlatReshapeOp{}},
 		{text: "flatten", operation: &FlattenOp{}},
 		{text: "delete", operation: &DeleteOp{}},
 		{text: "util", operation: utilityMenu},

@@ -30,8 +30,8 @@ func CopyOp(op Operation) Operation {
 		return &CropOp{}
 	case *ReshapeOp:
 		return &ReshapeOp{}
-	case *FlatReshapeOp:
-		return &FlatReshapeOp{}
+	case *FlattenOp:
+		return &FlattenOp{}
 	case *DeleteOp:
 		return &DeleteOp{}
 	case *LockOrderOp:
@@ -327,57 +327,6 @@ func (op *ReshapeOp) Draw(dst *ebiten.Image) {
 		op.Target.DrawWithOps(dst, &opts, 1)
 	}
 	draw.StrokeRect(dst, op.dstDrag.Rect(), clr, 2, -2)
-}
-
-type FlatReshapeOp struct {
-	flatOp *FlattenOp
-	drag   MouseDrag
-	spr    *sprite.Sprite
-}
-
-func (op FlatReshapeOp) String() string { return "liftshape" }
-
-func (op *FlatReshapeOp) Update(ui *UI) (done bool, err error) {
-	if op.flatOp == nil {
-		op.flatOp = &FlattenOp{}
-		ui.addOperation(op.flatOp)
-		return false, nil
-	}
-	if !op.flatOp.done {
-		return false, nil
-	}
-	if op.flatOp.spr == nil {
-		return true, nil
-	}
-	if op.spr == nil {
-		op.spr = op.flatOp.spr
-	}
-	if !op.drag.Update() {
-		return false, nil
-	}
-	if !op.drag.Moved() {
-		return true, nil
-	}
-	op.spr.Reshape(op.drag.Rect())
-	ui.Canvas.AddSprite(op.spr)
-	return true, nil
-}
-
-func (op *FlatReshapeOp) Draw(dst *ebiten.Image) {
-	clr := color.RGBA{0, 0, 255, 255}
-	if op.spr == nil {
-		return
-	}
-	// outline
-	draw.StrokeRect(dst, op.spr.Rect(), clr, 1, -1)
-	if !op.drag.Started {
-		return
-	}
-	if op.drag.Moved() {
-		opts := draw.ReshapeOpts(op.spr.Rect(), op.drag.Rect())
-		op.spr.DrawWithOps(dst, &opts, 1)
-	}
-	draw.StrokeRect(dst, op.drag.Rect(), clr, 2, -2)
 }
 
 type FlattenOp struct {
