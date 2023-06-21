@@ -270,63 +270,60 @@ func (op *ReshapeOp) Draw(dst *ebiten.Image) {
 }
 
 type FlatReshapeOp struct {
-	drag  MouseDrag
-	drag2 MouseDrag
-	spr   *sprite.Sprite
+	flatOp *FlattenOp
+	drag   MouseDrag
+	spr    *sprite.Sprite
 }
 
 func (op FlatReshapeOp) String() string { return "liftshape" }
 
 func (op *FlatReshapeOp) Update(ui *UI) (done bool, err error) {
+	if op.flatOp == nil {
+		op.flatOp = &FlattenOp{}
+		ui.addOperation(op.flatOp)
+		return false, nil
+	}
+	if !op.flatOp.done {
+		return false, nil
+	}
+	if op.flatOp.spr == nil {
+		return true, nil
+	}
+	if op.spr == nil {
+		op.spr = op.flatOp.spr
+	}
 	if !op.drag.Update() {
 		return false, nil
 	}
 	if !op.drag.Moved() {
 		return true, nil
 	}
-
-	if op.spr == nil {
-		im, r := draw.CropImage(ui.Canvas.Image(), op.drag.Rect(), image.Point{0, 0})
-		if im == nil {
-			return true, nil // error
-		}
-		op.spr = &sprite.Sprite{
-			Image: im,
-			Pos:   r.Min,
-		}
-	}
-
-	if !op.drag2.Update() {
-		return false, nil
-	}
-	if !op.drag2.Moved() {
-		return true, nil
-	}
-
-	op.spr.Reshape(op.drag2.Rect())
+	op.spr.Reshape(op.drag.Rect())
 	ui.Canvas.AddSprite(op.spr)
 	return true, nil
 }
 
 func (op *FlatReshapeOp) Draw(dst *ebiten.Image) {
 	clr := color.RGBA{0, 0, 255, 255}
+	if op.spr == nil {
+		return
+	}
+	// outline
+	draw.StrokeRect(dst, op.spr.Rect(), clr, 1, -1)
 	if !op.drag.Started {
 		return
 	}
-	draw.StrokeRect(dst, op.drag.Rect(), clr, 1, 1)
-	if !op.drag2.Started {
-		return
-	}
-	if op.drag2.Moved() {
-		opts := draw.ReshapeOpts(op.spr.Rect(), op.drag2.Rect())
+	if op.drag.Moved() {
+		opts := draw.ReshapeOpts(op.spr.Rect(), op.drag.Rect())
 		op.spr.DrawWithOps(dst, &opts, 1)
 	}
-	draw.StrokeRect(dst, op.drag2.Rect(), clr, 2, -2)
+	draw.StrokeRect(dst, op.drag.Rect(), clr, 2, -2)
 }
 
 type FlattenOp struct {
 	drag MouseDrag
 	spr  *sprite.Sprite
+	done bool
 }
 
 func (op FlattenOp) String() string { return "liftshape" }
@@ -335,6 +332,7 @@ func (op *FlattenOp) Update(ui *UI) (done bool, err error) {
 	if !op.drag.Update() {
 		return false, nil
 	}
+	op.done = true
 	if !op.drag.Moved() {
 		return true, nil
 	}
