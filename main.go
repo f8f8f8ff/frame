@@ -14,9 +14,9 @@ var (
 
 func main() {
 	ebiten.SetWindowSize(initScreenWidth, initScreenHeight)
-	ebiten.SetWindowTitle("title")
+	ebiten.SetWindowTitle("frame")
 	ebiten.SetWindowResizingMode(ebiten.WindowResizingModeEnabled)
-	ebiten.SetVsyncEnabled(false)
+	ebiten.SetVsyncEnabled(true)
 	ui := ui.NewUI(initScreenWidth, initScreenHeight)
 	if err := ebiten.RunGame(ui); err != nil {
 		log.Fatal(err)
