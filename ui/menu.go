@@ -12,7 +12,6 @@ import (
 
 func MainMenu(ui *UI) *Menu {
 	utilityMenuOps := []*MenuOption{
-		{text: "invert", operation: &InvertOp{}},
 		{text: "(un)lock order", operation: &LockOrderOp{}},
 		{text: "delete all", operation: &DeleteOp{Targets: ui.Canvas.Sprites()}},
 	}

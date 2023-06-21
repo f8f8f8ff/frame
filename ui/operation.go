@@ -36,8 +36,6 @@ func CopyOp(op Operation) Operation {
 		return &DeleteOp{}
 	case *LockOrderOp:
 		return &LockOrderOp{}
-	case *InvertOp:
-		return &InvertOp{}
 	}
 	return nil
 }
@@ -359,32 +357,5 @@ func (op LockOrderOp) String() string { return "(un)lock order" }
 
 func (op *LockOrderOp) Update(ui *UI) (done bool, err error) {
 	ui.LockOrder = !ui.LockOrder
-	return true, nil
-}
-
-type InvertOp struct {
-	selOp   *SelectOp
-	Targets []*sprite.Sprite
-}
-
-func (op InvertOp) String() string { return "invert" }
-
-func (op *InvertOp) Update(ui *UI) (done bool, err error) {
-	if len(op.Targets) == 0 {
-		if op.selOp == nil {
-			op.selOp = &SelectOp{clr: color.RGBA{0, 0, 0, 255}}
-			ui.addOperation(op.selOp)
-		}
-		if !op.selOp.done {
-			return false, nil
-		}
-		op.Targets = op.selOp.Targets
-		if len(op.Targets) == 0 {
-			return true, nil
-		}
-	}
-	for _, sp := range op.Targets {
-		sp.Image = draw.InvertImage(sp.Image)
-	}
 	return true, nil
 }
