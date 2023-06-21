@@ -128,6 +128,21 @@ const (
 	ReorderSendToBack
 )
 
+func (c ReorderCommand) String() string {
+	switch c {
+	case ReorderBringForwards:
+		return "bring forward"
+	case ReorderSendBackwards:
+		return "send backward"
+	case ReorderBringToFront:
+		return "bring to front"
+	case ReorderSendToBack:
+		return "send to back"
+	default:
+		return "none"
+	}
+}
+
 func (list SpriteList) Reorder(command ReorderCommand, s *Sprite) SpriteList {
 	log.Println(list)
 	l := SpriteList{}

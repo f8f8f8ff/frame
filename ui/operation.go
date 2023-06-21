@@ -1,6 +1,7 @@
 package ui
 
 import (
+	"fmt"
 	"frame/draw"
 	"frame/sprite"
 	"image"
@@ -36,6 +37,8 @@ func CopyOp(op Operation) Operation {
 		return &DeleteOp{}
 	case *LockOrderOp:
 		return &LockOrderOp{}
+	case *ReorderOp:
+		return &ReorderOp{command: op.command}
 	}
 	return nil
 }
@@ -406,7 +409,9 @@ type ReorderOp struct {
 	command sprite.ReorderCommand
 }
 
-func (op ReorderOp) String() string { return "reorder" }
+func (op ReorderOp) String() string {
+	return fmt.Sprintf("reorder: %v", op.command)
+}
 
 func (op *ReorderOp) Update(ui *UI) (done bool, err error) {
 	if op.command == sprite.ReorderNone {
