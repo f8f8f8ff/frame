@@ -3,6 +3,7 @@ package sprite
 import (
 	"frame/draw"
 	"image"
+	"image/color"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/colorm"
@@ -92,6 +93,10 @@ func (s *Sprite) Crop(r image.Rectangle) *Sprite {
 		Image: im,
 		Pos:   nr.Min,
 	}
+}
+
+func (s Sprite) Outline(dst *ebiten.Image, clr color.Color, strokeWidth, offset float32) {
+	draw.StrokeRect(dst, s.Rect(), clr, strokeWidth, offset)
 }
 
 // gives the sprite at position in SpriteList
