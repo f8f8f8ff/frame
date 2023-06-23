@@ -1,6 +1,6 @@
 # frame
 
-frame is an image collaging tool built using [ebiten](https://ebitengine.org/).
+frame is an image collaging tool built using [ebitengine](https://ebitengine.org/).
 drag images into frame and manipulate them.
 
 right click opens the operation menu.
