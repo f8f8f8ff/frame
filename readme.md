@@ -18,7 +18,7 @@ guidelines:
 todo:
 
 - [ ] rotate operation
-- [ ] reduce / increase alpha
+- [x] reduce / increase alpha
 - [ ] photoshop-like distort (maybe)
 
 bugs:
