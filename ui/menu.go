@@ -69,12 +69,16 @@ type Menu struct {
 	rect         *image.Rectangle
 	startPressed *bool
 	result       Operation
+	screensize   image.Point
 }
 
 func (m *Menu) Update(ui *UI) (done bool, err error) {
 	if m.rect == nil {
 		m.rect = &image.Rectangle{}
 		m.rect.Min = MousePos()
+	}
+	if m.screensize.Eq(image.Pt(0, 0)) {
+		m.screensize = image.Pt(ui.Width, ui.Height)
 	}
 	if m.startPressed == nil {
 		pressed := ebiten.IsMouseButtonPressed(m.mouseButton)
@@ -112,6 +116,19 @@ func (m *Menu) createOptionSprites() {
 	buttonRect := image.Rect(0, 0, width, height)
 	fg := image.Black
 	bg := image.White
+
+	overallsize := image.Point{width, height * len(m.options)}
+	m.rect.Max = m.rect.Min.Add(overallsize)
+	// +2 for menu border
+	if dx := m.rect.Max.X - m.screensize.X + 2; dx > 0 {
+		r := m.rect.Add(image.Point{-dx, 0})
+		m.rect = &r
+	}
+	if dy := m.rect.Max.Y - m.screensize.Y + 2; dy > 0 {
+		r := m.rect.Add(image.Point{0, -dy})
+		m.rect = &r
+	}
+
 	for index, opt := range m.options {
 		im := draw.NewTextImage(opt.text, draw.Font, buttonRect, padding, fg, bg)
 		sp := &sprite.Sprite{
@@ -121,8 +138,6 @@ func (m *Menu) createOptionSprites() {
 		sp.Pos = sp.Pos.Add(m.rect.Min)
 		opt.Sprite = sp
 	}
-	overallsize := image.Point{width, height * len(m.options)}
-	m.rect.Max = m.rect.Min.Add(overallsize)
 }
 
 func (m *Menu) Draw(dst *ebiten.Image) {
