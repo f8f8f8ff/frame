@@ -175,5 +175,8 @@ func (ui *UI) setStatus() {
 }
 
 func (ui *UI) drawStatus(dst *ebiten.Image) {
-	dst.DrawImage(draw.NewTextBlockImage(ui.status, draw.Font, 6, color.Black, color.Transparent), nil)
+	if ui.status == "" {
+		return
+	}
+	dst.DrawImage(draw.TextLineImage(ui.status+"\nline", draw.Font, 18, 4, color.Black, color.White), nil)
 }
