@@ -440,8 +440,17 @@ func (op *DeleteOp) Update(ui *UI) (done bool, err error) {
 		}
 	}
 	for _, sp := range op.Targets {
-		ui.Canvas.RemoveSprite(sp)
+		ui.RemoveSprite(sp)
 	}
+	return true, nil
+}
+
+type DeleteAllOp struct{}
+
+func (op DeleteAllOp) String() string { return "delete all" }
+
+func (op DeleteAllOp) Update(ui *UI) (done bool, err error) {
+	ui.Canvas.ClearSprites()
 	return true, nil
 }
 

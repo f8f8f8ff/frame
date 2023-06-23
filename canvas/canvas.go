@@ -54,20 +54,11 @@ func (c *Canvas) AddSprite(s *sprite.Sprite) {
 }
 
 func (c *Canvas) RemoveSprite(s *sprite.Sprite) {
-	if s == nil {
-		return
-	}
-	index := -1
-	for i, ss := range c.Sprites {
-		if ss == s {
-			index = i
-			break
-		}
-	}
-	if index == -1 {
-		return
-	}
-	c.Sprites = append(c.Sprites[:index], c.Sprites[index+1:]...)
+	c.Sprites = c.Sprites.Remove(s)
+}
+
+func (c *Canvas) ClearSprites() {
+	c.Sprites = sprite.SpriteList{}
 }
 
 func (c *Canvas) AddImage(img image.Image) {

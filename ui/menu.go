@@ -28,7 +28,7 @@ func MainMenu(ui *UI) *Menu {
 	reorderMenu := NewMenu(reorderMenuOps, ebiten.MouseButtonLeft)
 	utilityMenuOps := []*MenuOption{
 		{text: "(un)lock order", operation: &LockOrderOp{}},
-		{text: "delete all", operation: &DeleteOp{Targets: ui.Canvas.GetSprites()}},
+		{text: "delete all", operation: &DeleteAllOp{}},
 	}
 	utilityMenu := NewMenu(utilityMenuOps, ebiten.MouseButtonLeft)
 	options := []*MenuOption{
