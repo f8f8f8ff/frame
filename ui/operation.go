@@ -19,7 +19,7 @@ type Drawable interface {
 }
 
 // definies how to repeat an operation
-func CopyOp(op Operation) Operation {
+func CopyOperation(op Operation) Operation {
 	switch op := op.(type) {
 	case *SelectOp:
 		return &SelectOp{clr: op.clr}
@@ -39,6 +39,8 @@ func CopyOp(op Operation) Operation {
 		return &LockOrderOp{}
 	case *ReorderOp:
 		return &ReorderOp{command: op.command}
+	case *CopyOp:
+		return &CopyOp{}
 	}
 	return nil
 }
@@ -190,11 +192,10 @@ func (op *MoveOp) Draw(dst *ebiten.Image) {
 		return
 	}
 	for _, sp := range op.Targets {
-		// TODO outline func
-		draw.StrokeRect(dst, sp.Rect(), color.Black, 1, -1)
 		if op.drag.Started {
 			sp.Draw(dst, op.drag.Diff(), 1)
 		}
+		sp.Outline(dst, color.Black, 1, -1)
 	}
 }
 
@@ -458,5 +459,50 @@ func (op *SingleSelectOp) Update(ui *UI) (done bool, err error) {
 func (op *SingleSelectOp) Draw(dst *ebiten.Image) {
 	if op.target != nil {
 		op.target.Outline(dst, op.clr, 1, -1)
+	}
+}
+
+type CopyOp struct {
+	selOp   *SelectOp
+	drag    MouseDrag
+	Targets []*sprite.Sprite
+}
+
+func (op CopyOp) String() string { return "move" }
+
+func (op *CopyOp) Update(ui *UI) (done bool, err error) {
+	if len(op.Targets) == 0 {
+		if op.selOp == nil {
+			op.selOp = &SelectOp{clr: color.Black}
+			ui.addOperation(op.selOp)
+		}
+		if !op.selOp.done {
+			return false, nil
+		}
+		op.Targets = op.selOp.Targets
+		if len(op.Targets) == 0 {
+			return true, nil
+		}
+	}
+	if !op.drag.Update() {
+		return false, nil
+	}
+	for _, sp := range op.Targets {
+		copy := sp.Copy()
+		copy.MoveBy(op.drag.Diff())
+		ui.AddSprite(copy)
+	}
+	return true, nil
+}
+
+func (op *CopyOp) Draw(dst *ebiten.Image) {
+	if len(op.Targets) == 0 {
+		return
+	}
+	for _, sp := range op.Targets {
+		if op.drag.Started {
+			sp.Draw(dst, op.drag.Diff(), 1)
+		}
+		sp.Outline(dst, color.RGBA{0, 255, 0, 255}, 1, -1)
 	}
 }

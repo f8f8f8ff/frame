@@ -55,7 +55,7 @@ func (ui *UI) Update() error {
 			ui.addOperation(&DragOp{})
 		} else if inpututil.IsKeyJustPressed(ebiten.KeySpace) {
 			ui.addOperation(ui.lastOp)
-			ui.lastOp = CopyOp(ui.lastOp)
+			ui.lastOp = CopyOperation(ui.lastOp)
 		}
 	}
 	ui.HandleOperations()
@@ -84,7 +84,7 @@ func (ui *UI) HandleOperations() (err error) {
 				err = e
 				ui.removeOperation(op)
 				ui.addOperation(op.result)
-				c := CopyOp(op.result)
+				c := CopyOperation(op.result)
 				if c != nil {
 					ui.lastOp = c
 				}

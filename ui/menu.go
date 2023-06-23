@@ -26,6 +26,7 @@ func MainMenu(ui *UI) *Menu {
 	options := []*MenuOption{
 		RepeatMenuOption(ui.lastOp),
 		{text: "move", operation: &MoveOp{}},
+		{text: "copy", operation: &CopyOp{}},
 		{text: "crop", operation: &CropOp{}},
 		{text: "reshape", operation: &ReshapeOp{}},
 		{text: "flatten", operation: &FlattenOp{}},
