@@ -47,6 +47,15 @@ func NewTextImage(txt string, face font.Face, r image.Rectangle, padding int, fg
 	return img
 }
 
+func TextLineImage(txt string, face font.Face, height, padding int, fg color.Color, bg color.Color) *ebiten.Image {
+	if height < 1 {
+		return nil
+	}
+	width := BoundString(face, txt).Dx() + 2*padding
+	r := image.Rect(0, 0, width, height)
+	return NewTextImage(txt, face, r, padding, fg, bg)
+}
+
 func NewTextBlockImage(txt string, face font.Face, padding int, fg color.Color, bg color.Color) *ebiten.Image {
 	r := BoundString(face, txt)
 	// r = r.Sub(r.Min)
