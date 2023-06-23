@@ -21,8 +21,8 @@ type Drawable interface {
 // definies how to repeat an operation
 func CopyOperation(op Operation) Operation {
 	switch op := op.(type) {
-	case *SelectOp:
-		return &SelectOp{clr: op.clr}
+	case *SelectSpriteMultiOp:
+		return &SelectSpriteMultiOp{clr: op.clr}
 	case *MoveOp:
 		return &MoveOp{}
 	case *DragOp:
@@ -47,7 +47,7 @@ func CopyOperation(op Operation) Operation {
 	return nil
 }
 
-type SelectOp struct {
+type SelectSpriteMultiOp struct {
 	clr     color.Color
 	drag    MouseDrag
 	Targets []*sprite.Sprite
@@ -55,9 +55,9 @@ type SelectOp struct {
 	done    bool
 }
 
-func (op SelectOp) String() string { return "select sprite(s)" }
+func (op SelectSpriteMultiOp) String() string { return "select sprite(s)" }
 
-func (op *SelectOp) Update(ui *UI) (done bool, err error) {
+func (op *SelectSpriteMultiOp) Update(ui *UI) (done bool, err error) {
 	op.drag.Update()
 	if !op.drag.Started {
 		op.Targets = []*sprite.Sprite{}
@@ -97,7 +97,7 @@ func (op *SelectOp) Update(ui *UI) (done bool, err error) {
 	return false, nil
 }
 
-func (op *SelectOp) Draw(dst *ebiten.Image) {
+func (op *SelectSpriteMultiOp) Draw(dst *ebiten.Image) {
 	for _, sp := range op.Targets {
 		// outline
 		draw.StrokeRect(dst, sp.Rect(), op.clr, 1, -1)
@@ -108,7 +108,7 @@ func (op *SelectOp) Draw(dst *ebiten.Image) {
 	draw.StrokeRect(dst, op.drag.Rect(), op.clr, 1, 0)
 }
 
-type SelectSprOrRectOp struct {
+type SelectSpriteRectOp struct {
 	clr      color.Color
 	selDrag  MouseDrag
 	target   *sprite.Sprite
@@ -117,9 +117,9 @@ type SelectSprOrRectOp struct {
 	isSprite bool
 }
 
-func (op SelectSprOrRectOp) String() string { return "select sprite or region" }
+func (op SelectSpriteRectOp) String() string { return "select sprite or region" }
 
-func (op *SelectSprOrRectOp) Update(ui *UI) (done bool, err error) {
+func (op *SelectSpriteRectOp) Update(ui *UI) (done bool, err error) {
 	op.selDrag.Update()
 	op.target = ui.Canvas.SpriteAt(MousePos())
 	if !op.selDrag.Started {
@@ -140,7 +140,7 @@ func (op *SelectSprOrRectOp) Update(ui *UI) (done bool, err error) {
 	return true, nil
 }
 
-func (op *SelectSprOrRectOp) Draw(dst *ebiten.Image) {
+func (op *SelectSpriteRectOp) Draw(dst *ebiten.Image) {
 	if op.clr == nil {
 		op.clr = color.Black
 	}
@@ -155,9 +155,35 @@ func (op *SelectSprOrRectOp) Draw(dst *ebiten.Image) {
 }
 
 type MoveOp struct {
-	selOp   *SelectOp
+	selOp   *SelectSpriteMultiOp
 	drag    MouseDrag
 	Targets []*sprite.Sprite
+}
+
+type SelectSpriteOp struct {
+	target *sprite.Sprite
+	done   bool
+	clr    color.Color
+}
+
+func (op SelectSpriteOp) String() string { return "select sprite" }
+
+func (op *SelectSpriteOp) Update(ui *UI) (done bool, err error) {
+	if op.clr == nil {
+		op.clr = color.Black
+	}
+	op.target = ui.Canvas.SpriteAt(MousePos())
+	if MouseJustPressed(ebiten.MouseButtonLeft) {
+		op.done = true
+		return true, nil
+	}
+	return false, nil
+}
+
+func (op *SelectSpriteOp) Draw(dst *ebiten.Image) {
+	if op.target != nil {
+		op.target.Outline(dst, op.clr, 1, -1)
+	}
 }
 
 func (op MoveOp) String() string { return "move" }
@@ -165,7 +191,7 @@ func (op MoveOp) String() string { return "move" }
 func (op *MoveOp) Update(ui *UI) (done bool, err error) {
 	if len(op.Targets) == 0 {
 		if op.selOp == nil {
-			op.selOp = &SelectOp{clr: color.Black}
+			op.selOp = &SelectSpriteMultiOp{clr: color.Black}
 			ui.addOperation(op.selOp)
 		}
 		if !op.selOp.done {
@@ -209,6 +235,7 @@ type DragOp struct {
 func (op DragOp) String() string { return "drag" }
 
 func (op *DragOp) Update(ui *UI) (done bool, err error) {
+	// TODO update to use SelectSpriteOp
 	if len(op.Targets) == 0 {
 		if MouseJustPressed(ebiten.MouseButtonLeft) {
 			s := ui.Canvas.SpriteAt(MousePos())
@@ -230,7 +257,7 @@ func (op *DragOp) Update(ui *UI) (done bool, err error) {
 }
 
 type CropOp struct {
-	selOp   *SelectOp
+	selOp   *SelectSpriteMultiOp
 	drag    MouseDrag
 	Targets []*sprite.Sprite
 }
@@ -240,7 +267,7 @@ func (op CropOp) String() string { return "crop" }
 func (op *CropOp) Update(ui *UI) (done bool, err error) {
 	if len(op.Targets) == 0 {
 		if op.selOp == nil {
-			op.selOp = &SelectOp{clr: color.Black}
+			op.selOp = &SelectSpriteMultiOp{clr: color.Black}
 			ui.addOperation(op.selOp)
 		}
 		if !op.selOp.done {
@@ -279,7 +306,7 @@ func (op *CropOp) Draw(dst *ebiten.Image) {
 }
 
 type ReshapeOp struct {
-	sprOrRect *SelectSprOrRectOp
+	sprOrRect *SelectSpriteRectOp
 	dstDrag   MouseDrag
 	Target    *sprite.Sprite
 }
@@ -289,7 +316,7 @@ func (op ReshapeOp) String() string { return "reshape" }
 func (op *ReshapeOp) Update(ui *UI) (done bool, err error) {
 	if op.Target == nil {
 		if op.sprOrRect == nil {
-			op.sprOrRect = &SelectSprOrRectOp{clr: color.RGBA{0, 0, 255, 255}}
+			op.sprOrRect = &SelectSpriteRectOp{clr: color.RGBA{0, 0, 255, 255}}
 			ui.addOperation(op.sprOrRect)
 			return false, nil
 		}
@@ -372,7 +399,7 @@ func (op *FlattenOp) Draw(dst *ebiten.Image) {
 }
 
 type DeleteOp struct {
-	selOp   *SelectOp
+	selOp   *SelectSpriteMultiOp
 	Targets []*sprite.Sprite
 }
 
@@ -381,7 +408,7 @@ func (op DeleteOp) String() string { return "delete" }
 func (op *DeleteOp) Update(ui *UI) (done bool, err error) {
 	if len(op.Targets) == 0 {
 		if op.selOp == nil {
-			op.selOp = &SelectOp{clr: color.RGBA{255, 0, 0, 255}}
+			op.selOp = &SelectSpriteMultiOp{clr: color.RGBA{255, 0, 0, 255}}
 			ui.addOperation(op.selOp)
 		}
 		if !op.selOp.done {
@@ -408,7 +435,7 @@ func (op *LockOrderOp) Update(ui *UI) (done bool, err error) {
 }
 
 type ReorderOp struct {
-	selOp   *SingleSelectOp
+	selOp   *SelectSpriteOp
 	target  *sprite.Sprite
 	command sprite.ReorderCommand
 }
@@ -423,7 +450,7 @@ func (op *ReorderOp) Update(ui *UI) (done bool, err error) {
 	}
 	if op.target == nil {
 		if op.selOp == nil {
-			op.selOp = &SingleSelectOp{}
+			op.selOp = &SelectSpriteOp{}
 			ui.addOperation(op.selOp)
 		}
 		if !op.selOp.done {
@@ -438,34 +465,8 @@ func (op *ReorderOp) Update(ui *UI) (done bool, err error) {
 	return true, nil
 }
 
-type SingleSelectOp struct {
-	target *sprite.Sprite
-	done   bool
-	clr    color.Color
-}
-
-func (op SingleSelectOp) String() string { return "select sprite" }
-
-func (op *SingleSelectOp) Update(ui *UI) (done bool, err error) {
-	if op.clr == nil {
-		op.clr = color.Black
-	}
-	op.target = ui.Canvas.SpriteAt(MousePos())
-	if MouseJustPressed(ebiten.MouseButtonLeft) {
-		op.done = true
-		return true, nil
-	}
-	return false, nil
-}
-
-func (op *SingleSelectOp) Draw(dst *ebiten.Image) {
-	if op.target != nil {
-		op.target.Outline(dst, op.clr, 1, -1)
-	}
-}
-
 type CopyOp struct {
-	selOp   *SelectOp
+	selOp   *SelectSpriteMultiOp
 	drag    MouseDrag
 	Targets []*sprite.Sprite
 }
@@ -475,7 +476,7 @@ func (op CopyOp) String() string { return "move" }
 func (op *CopyOp) Update(ui *UI) (done bool, err error) {
 	if len(op.Targets) == 0 {
 		if op.selOp == nil {
-			op.selOp = &SelectOp{clr: color.Black}
+			op.selOp = &SelectSpriteMultiOp{clr: color.Black}
 			ui.addOperation(op.selOp)
 		}
 		if !op.selOp.done {
@@ -510,7 +511,7 @@ func (op *CopyOp) Draw(dst *ebiten.Image) {
 }
 
 type CutOp struct {
-	selOp   *SelectOp
+	selOp   *SelectSpriteMultiOp
 	drag    MouseDrag
 	Targets []*sprite.Sprite
 }
@@ -520,7 +521,7 @@ func (op CutOp) String() string { return "cut" }
 func (op *CutOp) Update(ui *UI) (done bool, err error) {
 	if len(op.Targets) == 0 {
 		if op.selOp == nil {
-			op.selOp = &SelectOp{clr: color.Black}
+			op.selOp = &SelectSpriteMultiOp{clr: color.Black}
 			ui.addOperation(op.selOp)
 		}
 		if !op.selOp.done {
