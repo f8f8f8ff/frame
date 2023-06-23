@@ -102,8 +102,7 @@ func (op *SelectSpriteMultiOp) Draw(dst *ebiten.Image) {
 		op.clr = color.Black
 	}
 	for _, sp := range op.Targets {
-		// outline
-		draw.StrokeRect(dst, sp.Rect(), op.clr, 1, -1)
+		sp.Outline(dst, op.clr, 1, -1)
 	}
 	if !op.drag.Started {
 		return
@@ -309,8 +308,7 @@ func (op *CropOp) Update(ui *UI) (done bool, err error) {
 
 func (op *CropOp) Draw(dst *ebiten.Image) {
 	for _, sp := range op.Targets {
-		// outline
-		draw.StrokeRect(dst, sp.Rect(), op.clr, 1, -1)
+		sp.Outline(dst, op.clr, 1, -1)
 	}
 	if !op.drag.Started {
 		return
@@ -366,8 +364,7 @@ func (op *ReshapeOp) Update(ui *UI) (done bool, err error) {
 
 func (op *ReshapeOp) Draw(dst *ebiten.Image) {
 	if op.Target != nil {
-		// outline
-		draw.StrokeRect(dst, op.Target.Rect(), op.clr, 1, -1)
+		op.Target.Outline(dst, op.clr, 1, -1)
 	}
 	if !op.dstDrag.Started {
 		return
@@ -578,8 +575,7 @@ func (op *CutOp) Update(ui *UI) (done bool, err error) {
 
 func (op *CutOp) Draw(dst *ebiten.Image) {
 	for _, sp := range op.Targets {
-		// outline
-		draw.StrokeRect(dst, sp.Rect(), op.clr, 1, -1)
+		sp.Outline(dst, op.clr, 1, -1)
 	}
 	if !op.drag.Started {
 		return
