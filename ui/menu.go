@@ -39,6 +39,7 @@ func MainMenu(ui *UI) *Menu {
 		{text: "cut", operation: &CutOp{}},
 		{text: "reshape", operation: &ReshapeOp{}},
 		{text: "flatten", operation: &FlattenOp{}},
+		{text: "opacity", operation: &OpacityOp{}},
 		{text: "delete", operation: &DeleteOp{}},
 		{text: "reorder", operation: reorderMenu},
 		{text: "util", operation: utilityMenu},

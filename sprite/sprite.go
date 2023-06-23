@@ -5,14 +5,16 @@ import (
 	"image"
 	"image/color"
 	"log"
+	"math"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/colorm"
 )
 
 type Sprite struct {
-	Image *ebiten.Image
-	Pos   image.Point
+	Image         *ebiten.Image
+	Pos           image.Point
+	OpacityOffset float64
 }
 
 // returns true if point is within the bounds of the sprite
@@ -44,7 +46,8 @@ func (s Sprite) Draw(dst *ebiten.Image, dv image.Point, alpha float64) {
 	if s.Image == nil {
 		return
 	}
-	draw.DrawImage(dst, s.Image, s.Pos.Add(dv), alpha)
+	a := math.Min(math.Max(0, alpha+s.OpacityOffset), 1)
+	draw.DrawImage(dst, s.Image, s.Pos.Add(dv), a)
 }
 
 // draw sprite with ebiten.DrawImageOptions
@@ -53,7 +56,8 @@ func (s Sprite) DrawWithOps(dst *ebiten.Image, opts *ebiten.DrawImageOptions, al
 	copts.GeoM = opts.GeoM
 	copts.GeoM.Translate(float64(s.Pos.X), float64(s.Pos.Y))
 	col := colorm.ColorM{}
-	col.Scale(1, 1, 1, alpha)
+	a := math.Min(math.Max(0, alpha+s.OpacityOffset), 1)
+	col.Scale(1, 1, 1, a)
 	colorm.DrawImage(dst, s.Image, col, copts)
 }
 
@@ -80,8 +84,9 @@ func (s *Sprite) Reshape(r image.Rectangle) {
 // returns a pointer to a new copy of the sprite
 func (s *Sprite) Copy() *Sprite {
 	return &Sprite{
-		Image: ebiten.NewImageFromImage(s.Image),
-		Pos:   s.Pos,
+		Image:         ebiten.NewImageFromImage(s.Image),
+		Pos:           s.Pos,
+		OpacityOffset: s.OpacityOffset,
 	}
 }
 

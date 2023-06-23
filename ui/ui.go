@@ -125,6 +125,8 @@ func (ui *UI) Draw(screen *ebiten.Image) {
 		switch op := ope.(type) {
 		case Drawable:
 			op.Draw(screen)
+		case FullDrawer:
+			op.FullDraw(screen, ui.Canvas)
 		}
 	}
 

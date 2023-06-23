@@ -2,12 +2,14 @@ package ui
 
 import (
 	"fmt"
-	"frame/draw"
-	"frame/sprite"
 	"image"
 	"image/color"
 
 	"github.com/hajimehoshi/ebiten/v2"
+
+	"frame/canvas"
+	"frame/draw"
+	"frame/sprite"
 )
 
 type Operation interface {
@@ -16,6 +18,10 @@ type Operation interface {
 
 type Drawable interface {
 	Draw(*ebiten.Image)
+}
+
+type FullDrawer interface {
+	FullDraw(*ebiten.Image, *canvas.Canvas)
 }
 
 // definies how to repeat an operation
@@ -590,4 +596,77 @@ func (op *CutOp) Draw(dst *ebiten.Image) {
 		return
 	}
 	draw.StrokeRect(dst, op.drag.Rect(), op.clr, 2, 2)
+}
+
+type OpacityOp struct {
+	selOp         *SelectSpriteMultiOp
+	drag          MouseDrag
+	Targets       []*sprite.Sprite
+	clr           color.Color
+	opacityOffset float64
+}
+
+func (op OpacityOp) String() string { return "change opacity" }
+
+func (op *OpacityOp) Update(ui *UI) (done bool, err error) {
+	if op.clr == nil {
+		op.clr = color.RGBA{0, 0, 0, 255} // black
+	}
+	if len(op.Targets) == 0 {
+		if op.selOp == nil {
+			op.selOp = &SelectSpriteMultiOp{clr: op.clr}
+			ui.addOperation(op.selOp)
+		}
+		if !op.selOp.done {
+			return false, nil
+		}
+		op.Targets = op.selOp.Targets
+		if len(op.Targets) == 0 {
+			return true, nil
+		}
+	}
+	released := op.drag.Update()
+	if !op.drag.Started {
+		return false, nil
+	}
+	op.opacityOffset = float64(-op.drag.Diff().Y) / 100
+	if !released {
+		return false, nil
+	}
+
+	for _, sp := range op.Targets {
+		o := sp.OpacityOffset + op.opacityOffset
+		if o > 0 {
+			o = 0
+		} else if o < -1 {
+			o = -1
+		}
+		sp.OpacityOffset = o
+	}
+	return true, nil
+}
+
+func (op *OpacityOp) FullDraw(dst *ebiten.Image, c *canvas.Canvas) {
+	dst.Fill(color.White)
+	for i := len(c.Sprites) - 1; i >= 0; i-- {
+		sp := c.Sprites[i]
+		cont := false
+		for _, t := range op.Targets {
+			if sp == t {
+				cont = true
+				break
+			}
+		}
+		if cont {
+			continue
+		}
+		sp.Draw(dst, image.Point{}, 1)
+	}
+	for _, sp := range op.Targets {
+		sp.Outline(dst, op.clr, 1, -1)
+	}
+	for i := len(op.Targets) - 1; i >= 0; i-- {
+		sp := op.Targets[i]
+		sp.Draw(dst, image.Point{0, 0}, 1+op.opacityOffset)
+	}
 }
