@@ -7,10 +7,10 @@ import (
 	"sync"
 
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 
 	"frame/canvas"
+	"frame/draw"
 )
 
 type UI struct {
@@ -25,6 +25,7 @@ type UI struct {
 	operations []interface{}
 	LockOrder  bool
 	lastOp     Operation
+	status     string
 }
 
 func NewUI(w, h int) *UI {
@@ -58,6 +59,7 @@ func (ui *UI) Update() error {
 		}
 	}
 	ui.HandleOperations()
+	ui.setStatus()
 
 	ui.Canvas.DrawSprites()
 	return nil
@@ -126,15 +128,17 @@ func (ui *UI) Draw(screen *ebiten.Image) {
 		}
 	}
 
-	msg := fmt.Sprintf("%0.f\n", ebiten.ActualFPS())
+	dbgmsg := fmt.Sprintf("%0.f\n", ebiten.ActualFPS())
 	if len(ui.operations) > 0 {
 		for _, o := range ui.operations {
-			msg += fmt.Sprintf("%v %#v\n", o, o)
+			dbgmsg += fmt.Sprintf("%v %#v\n", o, o)
 		}
 	}
-	msg += fmt.Sprintf("lastOp %v\n", ui.lastOp)
-	msg += fmt.Sprintf("Sprites: %v", ui.Canvas.Sprites)
-	ebitenutil.DebugPrint(screen, msg)
+	dbgmsg += fmt.Sprintf("lastOp %v\n", ui.lastOp)
+	dbgmsg += fmt.Sprintf("Sprites: %v", ui.Canvas.Sprites)
+	// ebitenutil.DebugPrint(screen, dbgmsg)
+
+	ui.drawStatus(screen)
 }
 
 func (ui *UI) addOperation(op interface{}) {
@@ -153,4 +157,23 @@ func (ui *UI) removeOperation(op interface{}) {
 		return
 	}
 	ui.operations = append(ui.operations[:index], ui.operations[index+1:]...)
+}
+
+func (ui *UI) setStatus() {
+	ui.status = ""
+	if len(ui.operations) == 0 {
+		return
+	}
+	o := ui.operations[0]
+	if o == nil {
+		return
+	}
+	if _, ok := o.(*Menu); ok {
+		return
+	}
+	ui.status = fmt.Sprintf("%v", o)
+}
+
+func (ui *UI) drawStatus(dst *ebiten.Image) {
+	dst.DrawImage(draw.NewTextBlockImage(ui.status, draw.Font, 6, color.Black, color.Transparent), nil)
 }
