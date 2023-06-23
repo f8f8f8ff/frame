@@ -51,7 +51,7 @@ type SelectOp struct {
 	done    bool
 }
 
-func (op SelectOp) String() string { return "select" }
+func (op SelectOp) String() string { return "select sprite(s)" }
 
 func (op *SelectOp) Update(ui *UI) (done bool, err error) {
 	op.drag.Update()
@@ -113,7 +113,7 @@ type SelectSprOrRectOp struct {
 	isSprite bool
 }
 
-func (op SelectSprOrRectOp) String() string { return "select sprite or rect" }
+func (op SelectSprOrRectOp) String() string { return "select sprite or region" }
 
 func (op *SelectSprOrRectOp) Update(ui *UI) (done bool, err error) {
 	op.selDrag.Update()
@@ -340,7 +340,7 @@ type FlattenOp struct {
 	done bool
 }
 
-func (op FlattenOp) String() string { return "liftshape" }
+func (op FlattenOp) String() string { return "flatten" }
 
 func (op *FlattenOp) Update(ui *UI) (done bool, err error) {
 	if op.rect.Empty() {
@@ -441,7 +441,7 @@ type SingleSelectOp struct {
 	clr    color.Color
 }
 
-func (op SingleSelectOp) String() string { return "select(single)" }
+func (op SingleSelectOp) String() string { return "select sprite" }
 
 func (op *SingleSelectOp) Update(ui *UI) (done bool, err error) {
 	if op.clr == nil {
