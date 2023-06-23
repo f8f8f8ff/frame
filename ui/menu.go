@@ -10,6 +10,14 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
+var (
+	menuItemHeight = 18
+	menuPadding    = 4
+	menuFg         = color.Black
+	menuBg         = color.White
+	menuPaddingClr = color.Black
+)
+
 func MainMenu(ui *UI) *Menu {
 	reorderMenuOps := []*MenuOption{
 		{text: "bring to front", operation: &ReorderOp{command: sprite.ReorderBringToFront}},
@@ -103,8 +111,6 @@ func (m *Menu) Update(ui *UI) (done bool, err error) {
 }
 
 func (m *Menu) createOptionSprites() {
-	const height int = 18
-	const padding int = 4
 	width := 0
 	for _, opt := range m.options {
 		w := draw.BoundString(draw.Font, opt.text).Dx()
@@ -112,12 +118,10 @@ func (m *Menu) createOptionSprites() {
 			width = w
 		}
 	}
-	width += padding * 2
-	buttonRect := image.Rect(0, 0, width, height)
-	fg := image.Black
-	bg := image.White
+	width += menuPadding * 2
+	buttonRect := image.Rect(0, 0, width, menuItemHeight)
 
-	overallsize := image.Point{width, height * len(m.options)}
+	overallsize := image.Point{width, menuItemHeight * len(m.options)}
 	m.rect.Max = m.rect.Min.Add(overallsize)
 	// +2 for menu border
 	if dx := m.rect.Max.X - m.screensize.X + 2; dx > 0 {
@@ -130,10 +134,10 @@ func (m *Menu) createOptionSprites() {
 	}
 
 	for index, opt := range m.options {
-		im := draw.NewTextImage(opt.text, draw.Font, buttonRect, padding, fg, bg)
+		im := draw.NewTextImage(opt.text, draw.Font, buttonRect, menuPadding, menuFg, menuBg)
 		sp := &sprite.Sprite{
 			Image: im,
-			Pos:   image.Point{0, index * height},
+			Pos:   image.Point{0, index * menuItemHeight},
 		}
 		sp.Pos = sp.Pos.Add(m.rect.Min)
 		opt.Sprite = sp
@@ -152,5 +156,5 @@ func (m *Menu) Draw(dst *ebiten.Image) {
 		opt.Draw(dst, image.Point{0, 0}, 1)
 	}
 	// outline menu, invert highlighed
-	draw.StrokeRect(dst, *m.rect, color.Black, 2, 2)
+	draw.StrokeRect(dst, *m.rect, menuPaddingClr, 2, 2)
 }
