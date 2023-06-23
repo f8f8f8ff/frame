@@ -172,6 +172,11 @@ func (ui *UI) setStatus() {
 		return
 	}
 	ui.status = fmt.Sprintf("%v", o)
+	if len(ui.operations) > 1 {
+		for i := 1; i < len(ui.operations); i++ {
+			ui.status += fmt.Sprintf(", %v", ui.operations[i])
+		}
+	}
 }
 
 func (ui *UI) drawStatus(dst *ebiten.Image) {
