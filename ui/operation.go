@@ -41,6 +41,8 @@ func CopyOperation(op Operation) Operation {
 		return &ReorderOp{command: op.command}
 	case *CopyOp:
 		return &CopyOp{}
+	case *CutOp:
+		return &CutOp{}
 	}
 	return nil
 }
@@ -505,4 +507,47 @@ func (op *CopyOp) Draw(dst *ebiten.Image) {
 		}
 		sp.Outline(dst, color.RGBA{0, 255, 0, 255}, 1, -1)
 	}
+}
+
+type CutOp struct {
+	selOp   *SelectOp
+	drag    MouseDrag
+	Targets []*sprite.Sprite
+}
+
+func (op CutOp) String() string { return "cut" }
+
+func (op *CutOp) Update(ui *UI) (done bool, err error) {
+	if len(op.Targets) == 0 {
+		if op.selOp == nil {
+			op.selOp = &SelectOp{clr: color.Black}
+			ui.addOperation(op.selOp)
+		}
+		if !op.selOp.done {
+			return false, nil
+		}
+		op.Targets = op.selOp.Targets
+		if len(op.Targets) == 0 {
+			return true, nil
+		}
+	}
+	if !op.drag.Update() {
+		return false, nil
+	}
+	for _, sp := range op.Targets {
+		draw.CutImage(sp.Image, op.drag.Rect().Sub(sp.Pos))
+	}
+	return true, nil
+}
+
+func (op *CutOp) Draw(dst *ebiten.Image) {
+	clr := color.RGBA{0, 255, 0, 255}
+	for _, sp := range op.Targets {
+		// outline
+		draw.StrokeRect(dst, sp.Rect(), clr, 1, -1)
+	}
+	if !op.drag.Started {
+		return
+	}
+	draw.StrokeRect(dst, op.drag.Rect(), clr, 2, 2)
 }

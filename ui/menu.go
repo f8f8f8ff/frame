@@ -36,6 +36,7 @@ func MainMenu(ui *UI) *Menu {
 		{text: "move", operation: &MoveOp{}},
 		{text: "copy", operation: &CopyOp{}},
 		{text: "crop", operation: &CropOp{}},
+		{text: "cut", operation: &CutOp{}},
 		{text: "reshape", operation: &ReshapeOp{}},
 		{text: "flatten", operation: &FlattenOp{}},
 		{text: "delete", operation: &DeleteOp{}},

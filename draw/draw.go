@@ -86,7 +86,30 @@ func StrokeRect(dst *ebiten.Image, rect image.Rectangle, clr color.Color, stroke
 }
 
 func InvertImage(src *ebiten.Image) *ebiten.Image {
-	dst := ebiten.NewImage(src.Size())
+	dst := ebiten.NewImage(src.Bounds().Dx(), src.Bounds().Dy())
 	DrawImageInverted(dst, src, image.Point{}, 1)
 	return dst
+}
+
+func CutImage(dst *ebiten.Image, rect image.Rectangle) {
+	rect = rect.Canon()
+	if rect.Dx() == 0 || rect.Dy() == 0 {
+		return
+	}
+	if !rect.Overlaps(dst.Bounds()) {
+		return
+	}
+	mask := ebiten.NewImage(rect.Dx(), rect.Dy())
+	mask.Fill(color.White)
+	opt := ebiten.DrawImageOptions{}
+	opt.GeoM.Translate(float64(rect.Min.X), float64(rect.Min.Y))
+	opt.Blend = ebiten.Blend{
+		BlendFactorSourceRGB:        ebiten.BlendFactorDestinationColor,
+		BlendFactorSourceAlpha:      ebiten.BlendFactorDestinationAlpha,
+		BlendFactorDestinationRGB:   ebiten.BlendFactorOne,
+		BlendFactorDestinationAlpha: ebiten.BlendFactorOne,
+		BlendOperationRGB:           ebiten.BlendOperationAdd,
+		BlendOperationAlpha:         ebiten.BlendOperationSubtract,
+	}
+	dst.DrawImage(mask, &opt)
 }
