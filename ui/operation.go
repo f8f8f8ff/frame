@@ -402,9 +402,10 @@ func (op *FlattenOp) Update(ui *UI) (done bool, err error) {
 		}
 		op.done = true
 		if !op.drag.Moved() {
-			return true, nil
+			op.rect = ui.Canvas.Image().Bounds()
+		} else {
+			op.rect = op.drag.Rect()
 		}
-		op.rect = op.drag.Rect()
 	}
 	if op.spr == nil {
 		op.spr = ui.Canvas.NewSpriteFromRegion(op.rect)
@@ -669,4 +670,23 @@ func (op *OpacityOp) FullDraw(dst *ebiten.Image, c *canvas.Canvas) {
 		sp := op.Targets[i]
 		sp.Draw(dst, image.Point{0, 0}, 1+op.opacityOffset)
 	}
+}
+
+type CBCopyOp struct {
+	flattenOp *FlattenOp
+}
+
+func (op *CBCopyOp) String() string { return "copy region to clipboard" }
+
+func (op *CBCopyOp) Update(ui *UI) (done bool, err error) {
+	if op.flattenOp == nil {
+		op.flattenOp = &FlattenOp{}
+		ui.addOperation(op.flattenOp)
+		return false, nil
+	}
+	if op.flattenOp.spr == nil {
+		return false, nil
+	}
+	ui.RemoveSprite(op.flattenOp.spr)
+	return true, copyClipboard(op.flattenOp.spr.Image)
 }
