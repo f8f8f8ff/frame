@@ -96,12 +96,12 @@ func (ui *UI) handlePaste() error {
 	if img == nil {
 		return nil
 	}
-	ui.Canvas.AddImage(img)
+	s := ui.Canvas.AddImage(img)
+	s.MoveBy(MousePos())
 	return nil
 }
 
 func init() {
-	log.Println("clipboard init")
 	err := clipboard.Init()
 	if err != nil {
 		log.Println("no clipboard", err)
