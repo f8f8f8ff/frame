@@ -690,3 +690,32 @@ func (op *CBCopyOp) Update(ui *UI) (done bool, err error) {
 	ui.RemoveSprite(op.flattenOp.spr)
 	return true, copyClipboard(op.flattenOp.spr.Image)
 }
+
+type CBPasteOp struct {
+	spr    *sprite.Sprite
+	setPos bool
+}
+
+func (op *CBPasteOp) String() string { return "paste from clipboard" }
+
+func (op *CBPasteOp) Update(ui *UI) (done bool, err error) {
+	if op.spr == nil {
+		op.spr, err = handlePaste()
+		if err != nil || op.spr == nil {
+			return true, err
+		}
+		ui.AddSprite(op.spr)
+	}
+	op.spr.Pos = MousePos()
+	if op.setPos || MouseJustPressed(ebiten.MouseButtonLeft) {
+		return true, nil
+	}
+	return false, nil
+}
+
+func (op *CBPasteOp) Draw(dst *ebiten.Image) {
+	if op.spr == nil {
+		return
+	}
+	op.spr.Draw(dst, image.Point{}, 1)
+}

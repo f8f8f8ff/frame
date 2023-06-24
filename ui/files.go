@@ -1,6 +1,8 @@
 package ui
 
 import (
+	"bytes"
+	"frame/sprite"
 	"image"
 	_ "image/gif"
 	_ "image/jpeg"
@@ -11,9 +13,6 @@ import (
 	_ "golang.org/x/image/webp"
 
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/inpututil"
-
-	"bytes"
 
 	"golang.design/x/clipboard"
 )
@@ -92,27 +91,25 @@ func copyClipboard(img *ebiten.Image) error {
 	return nil
 }
 
-func (ui *UI) handlePaste() error {
+func handlePaste() (*sprite.Sprite, error) {
 	if !clipboardEnabled {
-		return nil
-	}
-	if !inpututil.IsKeyJustPressed(ebiten.KeyV) || !ebiten.IsKeyPressed(ebiten.KeyControl) {
-		return nil
+		return nil, nil
 	}
 	b := clipboard.Read(clipboard.FmtImage)
 	if b == nil {
-		return nil
+		return nil, nil
 	}
 	img, _, err := image.Decode(bytes.NewReader(b))
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if img == nil {
-		return nil
+		return nil, nil
 	}
-	s := ui.Canvas.AddImage(img)
-	s.MoveBy(MousePos())
-	return nil
+	s := &sprite.Sprite{
+		Image: ebiten.NewImageFromImage(img),
+	}
+	return s, nil
 }
 
 func init() {

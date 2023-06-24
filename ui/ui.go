@@ -43,10 +43,6 @@ func (ui *UI) Update() error {
 	if err != nil {
 		return err
 	}
-	err = ui.handlePaste()
-	if err != nil {
-		return err
-	}
 
 	if len(ui.operations) == 0 {
 		if MouseJustPressed(ebiten.MouseButtonRight) {
@@ -56,6 +52,8 @@ func (ui *UI) Update() error {
 		} else if inpututil.IsKeyJustPressed(ebiten.KeySpace) {
 			ui.addOperation(ui.lastOp)
 			ui.lastOp = CopyOperation(ui.lastOp)
+		} else if inpututil.IsKeyJustPressed(ebiten.KeyV) && ebiten.IsKeyPressed(ebiten.KeyControl) {
+			ui.addOperation(&CBPasteOp{setPos: true})
 		}
 	}
 	ui.HandleOperations()
