@@ -27,6 +27,7 @@ func MainMenu(ui *UI) *Menu {
 	}
 	reorderMenu := NewMenu(reorderMenuOps, ebiten.MouseButtonLeft)
 	utilityMenuOps := []*MenuOption{
+		{text: "copy to clipboard", operation: &CBCopyOp{}},
 		{text: "(un)lock order", operation: &LockOrderOp{}},
 		{text: "delete all", operation: &DeleteAllOp{}},
 	}

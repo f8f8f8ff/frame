@@ -4,7 +4,7 @@ import (
 	"image"
 	_ "image/gif"
 	_ "image/jpeg"
-	_ "image/png"
+	"image/png"
 	"io/fs"
 	"log"
 
@@ -77,6 +77,20 @@ func (ui *UI) handleDroppedFiles() error {
 }
 
 var clipboardEnabled bool
+
+func copyClipboard(img *ebiten.Image) error {
+	i := img.SubImage(img.Bounds())
+	if i == nil {
+		return nil
+	}
+	var buffer bytes.Buffer
+	err := png.Encode(&buffer, i)
+	if err != nil {
+		return err
+	}
+	clipboard.Write(clipboard.FmtImage, buffer.Bytes())
+	return nil
+}
 
 func (ui *UI) handlePaste() error {
 	if !clipboardEnabled {
