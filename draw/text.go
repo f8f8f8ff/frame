@@ -9,20 +9,21 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/text"
 
 	"golang.org/x/image/font"
-	"golang.org/x/image/font/gofont/gomono"
 	"golang.org/x/image/font/opentype"
+
+	_font "frame/draw/font"
 )
 
 var Font font.Face
 
 func init() {
-	tt, err := opentype.Parse(gomono.TTF)
+	tt, err := opentype.Parse(_font.Times_ttf) //gomono.TTF
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	Font, err = opentype.NewFace(tt, &opentype.FaceOptions{
-		Size:    14,
+		Size:    16,
 		DPI:     72,
 		Hinting: font.HintingFull,
 	})
