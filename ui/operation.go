@@ -402,9 +402,10 @@ func (op *FlattenOp) Update(ui *UI) (done bool, err error) {
 		}
 		op.done = true
 		if !op.drag.Moved() {
-			return true, nil
+			op.rect = ui.Canvas.Image().Bounds()
+		} else {
+			op.rect = op.drag.Rect()
 		}
-		op.rect = op.drag.Rect()
 	}
 	if op.spr == nil {
 		op.spr = ui.Canvas.NewSpriteFromRegion(op.rect)
