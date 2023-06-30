@@ -53,18 +53,23 @@ func (op *CarveOp) Update(ui *UI) (done bool, err error) {
 	if !op.dstDrag.Moved() {
 		return true, nil
 	}
-	// op.Target.Reshape(op.dstDrag.Rect())
-	img := carve.Resize(op.Target.Image, op.dstDrag.Rect().Dx(), op.dstDrag.Rect().Dy())
-	s := &sprite.Sprite{
-		Image:         ebiten.NewImageFromImage(img),
-		Pos:           op.dstDrag.Rect().Min,
-		OpacityOffset: 0,
+
+	resizeFunc := func() {
+		img := carve.Resize(op.Target.Image, op.dstDrag.Rect().Dx(), op.dstDrag.Rect().Dy())
+		s := &sprite.Sprite{
+			Image:         ebiten.NewImageFromImage(img),
+			Pos:           op.dstDrag.Rect().Min,
+			OpacityOffset: 0,
+		}
+		ui.Canvas.RemoveSprite(op.Target)
+		ui.Canvas.AddSprite(s)
 	}
-	ui.Canvas.RemoveSprite(op.Target)
-	ui.Canvas.AddSprite(s)
+	go resizeFunc()
 	return true, nil
 }
 
+// TODO make carveop draw rectangle while loading
+// will take some work in ui, maybe a new queue of async operations
 func (op *CarveOp) Draw(dst *ebiten.Image) {
 	if op.Target != nil {
 		op.Target.Outline(dst, op.clr, 1, -1)
