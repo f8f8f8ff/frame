@@ -40,6 +40,7 @@ func MainMenu(ui *UI) *Menu {
 		{text: "crop", operation: &CropOp{}},
 		{text: "cut", operation: &CutOp{}},
 		{text: "reshape", operation: &ReshapeOp{}},
+		{text: "carve", operation: &CarveOp{}},
 		{text: "flatten", operation: &FlattenOp{}},
 		{text: "opacity", operation: &OpacityOp{}},
 		{text: "delete", operation: &DeleteOp{}},

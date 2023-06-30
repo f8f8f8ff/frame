@@ -49,6 +49,8 @@ func CopyOperation(op Operation) Operation {
 		return &CopyOp{}
 	case *CutOp:
 		return &CutOp{}
+	case *CarveOp:
+		return &CarveOp{}
 	}
 	return nil
 }
