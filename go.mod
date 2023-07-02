@@ -2,10 +2,10 @@ module frame
 
 go 1.20
 
-replace carve => ../carve
+replace carve => ./carve
 
 require (
-	carve v0.0.0-00010101000000-000000000000
+	carve v0.1.0
 	github.com/hajimehoshi/ebiten/v2 v2.5.5
 	golang.design/x/clipboard v0.7.0
 	golang.org/x/image v0.8.0
