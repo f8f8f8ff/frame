@@ -85,6 +85,14 @@ func StrokeRect(dst *ebiten.Image, rect image.Rectangle, clr color.Color, stroke
 	vector.StrokeRect(dst, x, y, w, h, strokeWidth, clr, false)
 }
 
+func FillRect(dst *ebiten.Image, rect image.Rectangle, clr color.Color) {
+	x := float32(rect.Min.X)
+	y := float32(rect.Min.Y)
+	w := float32(rect.Dx())
+	h := float32(rect.Dy())
+	vector.DrawFilledRect(dst, x, y, w, h, clr, false)
+}
+
 func InvertImage(src *ebiten.Image) *ebiten.Image {
 	dst := ebiten.NewImage(src.Bounds().Dx(), src.Bounds().Dy())
 	DrawImageInverted(dst, src, image.Point{}, 1)

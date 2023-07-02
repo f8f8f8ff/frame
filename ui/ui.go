@@ -44,7 +44,15 @@ func (ui *UI) Update() error {
 		return err
 	}
 
-	if len(ui.operations) == 0 {
+	var lockingOps []interface{}
+	for _, op := range ui.operations {
+		if _, ok := op.(*CarveProgress); ok {
+			continue
+		}
+		lockingOps = append(lockingOps, op)
+	}
+
+	if len(lockingOps) == 0 {
 		if MouseJustPressed(ebiten.MouseButtonRight) {
 			ui.addOperation(MainMenu(ui))
 		} else if MouseJustPressed(ebiten.MouseButtonLeft) {
@@ -86,6 +94,11 @@ func (ui *UI) HandleOperations() (err error) {
 				if c != nil {
 					ui.lastOp = c
 				}
+			}
+		case *CarveProgress:
+			if done, e := op.Update(ui); done {
+				ui.removeOperation(op)
+				err = e
 			}
 		case Operation:
 			// log.Printf("%T\n", op)
