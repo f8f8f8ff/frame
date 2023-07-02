@@ -47,6 +47,9 @@ func (op *CarveOp) Update(ui *UI) (done bool, err error) {
 		op.Target = s
 		ui.Canvas.AddSprite(s)
 	}
+	if op.Target.Rect().Dx() < 5 || op.Target.Rect().Dy() < 5 {
+		return true, nil
+	}
 	if !op.dstDrag.Update() {
 		return false, nil
 	}
@@ -68,7 +71,7 @@ func (op *CarveOp) Update(ui *UI) (done bool, err error) {
 }
 
 // TODO make carveop draw rectangle while loading
-// will take some work in ui, maybe a new queue of async operations
+// will take some work in ui, maybe a new queue of async
 func (op *CarveOp) Draw(dst *ebiten.Image) {
 	if op.Target != nil {
 		op.Target.Outline(dst, op.clr, 1, -1)
