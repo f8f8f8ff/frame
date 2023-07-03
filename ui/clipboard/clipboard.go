@@ -1,4 +1,5 @@
-// go:build !js
+//go:build !js && !wasm
+// +build !js,!wasm
 
 package clipboard
 
