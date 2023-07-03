@@ -10,6 +10,7 @@ import (
 	"frame/canvas"
 	"frame/draw"
 	"frame/sprite"
+	"frame/ui/clipboard"
 )
 
 type Operation interface {
@@ -683,6 +684,10 @@ type CBCopyOp struct {
 func (op *CBCopyOp) String() string { return "copy region to clipboard" }
 
 func (op *CBCopyOp) Update(ui *UI) (done bool, err error) {
+	if !clipboard.Enabled {
+		// add error
+		return true, nil
+	}
 	if op.flattenOp == nil {
 		op.flattenOp = &FlattenOp{}
 		ui.addOperation(op.flattenOp)
@@ -692,7 +697,7 @@ func (op *CBCopyOp) Update(ui *UI) (done bool, err error) {
 		return false, nil
 	}
 	ui.RemoveSprite(op.flattenOp.spr)
-	return true, copyClipboard(op.flattenOp.spr.Image)
+	return true, clipboard.Copy(op.flattenOp.spr.Image)
 }
 
 type CBPasteOp struct {
@@ -703,8 +708,12 @@ type CBPasteOp struct {
 func (op *CBPasteOp) String() string { return "paste from clipboard" }
 
 func (op *CBPasteOp) Update(ui *UI) (done bool, err error) {
+	if !clipboard.Enabled {
+		// add error
+		return true, nil
+	}
 	if op.spr == nil {
-		op.spr, err = handlePaste()
+		op.spr, err = clipboard.Paste()
 		if err != nil || op.spr == nil {
 			return true, err
 		}
