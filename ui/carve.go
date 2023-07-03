@@ -70,6 +70,7 @@ func (op *CarveOp) Update(ui *UI) (done bool, err error) {
 			Pos:           op.dstDrag.Rect().Min,
 			OpacityOffset: 0,
 		}
+		ui.Canvas.RemoveSprite(op.Target)
 		ui.Canvas.AddSprite(s)
 	}()
 	cp := &CarveProgress{
