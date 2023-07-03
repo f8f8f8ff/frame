@@ -39,6 +39,7 @@ func MainMenu(ui *UI) *Menu {
 		{text: "copy", operation: &CopyOp{}},
 		{text: "crop", operation: &CropOp{}},
 		{text: "cut", operation: &CutOp{}},
+		{text: "rotate", operation: &RotateOp{}},
 		{text: "reshape", operation: &ReshapeOp{}},
 		{text: "carve", operation: &CarveOp{}},
 		{text: "flatten", operation: &FlattenOp{}},

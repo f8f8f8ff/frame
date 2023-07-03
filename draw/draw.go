@@ -3,6 +3,7 @@ package draw
 import (
 	"image"
 	"image/color"
+	"math"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/colorm"
@@ -120,4 +121,14 @@ func CutImage(dst *ebiten.Image, rect image.Rectangle) {
 		BlendOperationAlpha:         ebiten.BlendOperationSubtract,
 	}
 	dst.DrawImage(mask, &opt)
+}
+
+func RotateImage(src *ebiten.Image) *ebiten.Image {
+	w, h := src.Bounds().Dx(), src.Bounds().Dy()
+	dst := ebiten.NewImage(h, w)
+	opts := &ebiten.DrawImageOptions{}
+	opts.GeoM.Rotate(math.Pi / 2)
+	opts.GeoM.Translate(float64(h), 0)
+	dst.DrawImage(src, opts)
+	return dst
 }

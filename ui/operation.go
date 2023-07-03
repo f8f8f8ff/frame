@@ -51,6 +51,8 @@ func CopyOperation(op Operation) Operation {
 		return &CutOp{}
 	case *CarveOp:
 		return &CarveOp{}
+	case *RotateOp:
+		return &RotateOp{}
 	}
 	return nil
 }
@@ -720,4 +722,33 @@ func (op *CBPasteOp) Draw(dst *ebiten.Image) {
 		return
 	}
 	op.spr.Draw(dst, image.Point{}, 1)
+}
+
+type RotateOp struct {
+	selOp  *SelectSpriteOp
+	target *sprite.Sprite
+	clr    color.Color
+}
+
+func (op RotateOp) String() string { return "rotate 90" }
+
+func (op *RotateOp) Update(ui *UI) (done bool, err error) {
+	if op.clr == nil {
+		op.clr = color.Black
+	}
+	if op.target == nil {
+		if op.selOp == nil {
+			op.selOp = &SelectSpriteOp{clr: op.clr}
+			ui.addOperation(op.selOp)
+		}
+		if !op.selOp.done {
+			return false, nil
+		}
+		if op.selOp.target == nil {
+			return true, nil
+		}
+		op.target = op.selOp.target
+	}
+	op.target.Rotate90()
+	return true, nil
 }
