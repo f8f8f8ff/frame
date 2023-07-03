@@ -38,7 +38,7 @@ func (ui *UI) handleDroppedFiles() error {
 				if err != nil {
 					return err
 				}
-				log.Printf("Name: %s, Size: %d, IsDir: %t, ModTime: %v", fi.Name(), fi.Size(), fi.IsDir(), fi.ModTime())
+				// log.Printf("Name: %s, Size: %d, IsDir: %t, ModTime: %v", fi.Name(), fi.Size(), fi.IsDir(), fi.ModTime())
 
 				f, err := files.Open(path)
 				if err != nil {
