@@ -5,7 +5,7 @@ go 1.20
 replace carve => ./carve
 
 require (
-	carve v0.1.0
+	carve v0.1.1
 	github.com/hajimehoshi/ebiten/v2 v2.5.5
 	golang.design/x/clipboard v0.7.0
 	golang.org/x/image v0.8.0
