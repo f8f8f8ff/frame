@@ -17,9 +17,10 @@ guidelines:
 
 todo:
 
-- [ ] rotate operation
+- [x] rotate operation
 - [x] reduce / increase alpha
 - [ ] photoshop-like distort (maybe)
+- [x] seam carving
 
 bugs:
 
