@@ -43,12 +43,16 @@ func (ui *UI) Update() error {
 	if err != nil {
 		return err
 	}
-	err = ui.handlePaste()
-	if err != nil {
-		return err
+
+	var lockingOps []interface{}
+	for _, op := range ui.operations {
+		if _, ok := op.(*CarveProgress); ok {
+			continue
+		}
+		lockingOps = append(lockingOps, op)
 	}
 
-	if len(ui.operations) == 0 {
+	if len(lockingOps) == 0 {
 		if MouseJustPressed(ebiten.MouseButtonRight) {
 			ui.addOperation(MainMenu(ui))
 		} else if MouseJustPressed(ebiten.MouseButtonLeft) {
@@ -56,6 +60,8 @@ func (ui *UI) Update() error {
 		} else if inpututil.IsKeyJustPressed(ebiten.KeySpace) {
 			ui.addOperation(ui.lastOp)
 			ui.lastOp = CopyOperation(ui.lastOp)
+		} else if inpututil.IsKeyJustPressed(ebiten.KeyV) && ebiten.IsKeyPressed(ebiten.KeyControl) {
+			ui.addOperation(&CBPasteOp{setPos: true})
 		}
 	}
 	ui.HandleOperations()
@@ -88,6 +94,11 @@ func (ui *UI) HandleOperations() (err error) {
 				if c != nil {
 					ui.lastOp = c
 				}
+			}
+		case *CarveProgress:
+			if done, e := op.Update(ui); done {
+				ui.removeOperation(op)
+				err = e
 			}
 		case Operation:
 			// log.Printf("%T\n", op)
@@ -163,21 +174,17 @@ func (ui *UI) removeOperation(op interface{}) {
 
 func (ui *UI) setStatus() {
 	ui.status = ""
-	if len(ui.operations) == 0 {
-		return
-	}
-	o := ui.operations[0]
-	if o == nil {
-		return
-	}
-	if _, ok := o.(*Menu); ok {
-		return
-	}
-	ui.status = fmt.Sprintf("%v", o)
-	if len(ui.operations) > 1 {
-		for i := 1; i < len(ui.operations); i++ {
-			ui.status += fmt.Sprintf(", %v", ui.operations[i])
+	for i, o := range ui.operations {
+		if o == nil {
+			continue
 		}
+		if _, ok := o.(*Menu); ok {
+			continue
+		}
+		if i > 0 {
+			ui.status += ", "
+		}
+		ui.status += fmt.Sprintf("%v", o)
 	}
 }
 

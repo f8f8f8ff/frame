@@ -61,13 +61,14 @@ func (c *Canvas) ClearSprites() {
 	c.Sprites = sprite.SpriteList{}
 }
 
-func (c *Canvas) AddImage(img image.Image) {
+func (c *Canvas) AddImage(img image.Image) *sprite.Sprite {
 	i := ebiten.NewImageFromImage(img)
 	s := &sprite.Sprite{
 		Image: i,
 		Pos:   image.Point{0, 0},
 	}
 	c.AddSprite(s)
+	return s
 }
 
 func (c *Canvas) SpriteAt(p image.Point) *sprite.Sprite {

@@ -3,6 +3,7 @@ package draw
 import (
 	"image"
 	"image/color"
+	"math"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/colorm"
@@ -85,6 +86,14 @@ func StrokeRect(dst *ebiten.Image, rect image.Rectangle, clr color.Color, stroke
 	vector.StrokeRect(dst, x, y, w, h, strokeWidth, clr, false)
 }
 
+func FillRect(dst *ebiten.Image, rect image.Rectangle, clr color.Color) {
+	x := float32(rect.Min.X)
+	y := float32(rect.Min.Y)
+	w := float32(rect.Dx())
+	h := float32(rect.Dy())
+	vector.DrawFilledRect(dst, x, y, w, h, clr, false)
+}
+
 func InvertImage(src *ebiten.Image) *ebiten.Image {
 	dst := ebiten.NewImage(src.Bounds().Dx(), src.Bounds().Dy())
 	DrawImageInverted(dst, src, image.Point{}, 1)
@@ -112,4 +121,14 @@ func CutImage(dst *ebiten.Image, rect image.Rectangle) {
 		BlendOperationAlpha:         ebiten.BlendOperationSubtract,
 	}
 	dst.DrawImage(mask, &opt)
+}
+
+func RotateImage(src *ebiten.Image) *ebiten.Image {
+	w, h := src.Bounds().Dx(), src.Bounds().Dy()
+	dst := ebiten.NewImage(h, w)
+	opts := &ebiten.DrawImageOptions{}
+	opts.GeoM.Rotate(math.Pi / 2)
+	opts.GeoM.Translate(float64(h), 0)
+	dst.DrawImage(src, opts)
+	return dst
 }

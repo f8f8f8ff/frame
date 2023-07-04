@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"frame/draw"
 	"frame/sprite"
+	"frame/ui/clipboard"
 	"image"
 	"image/color"
 
@@ -26,10 +27,17 @@ func MainMenu(ui *UI) *Menu {
 		{text: "send backwards", operation: &ReorderOp{command: sprite.ReorderSendBackwards}},
 	}
 	reorderMenu := NewMenu(reorderMenuOps, ebiten.MouseButtonLeft)
-	utilityMenuOps := []*MenuOption{
+	utilityMenuOps := []*MenuOption{}
+	if clipboard.Enabled {
+		utilityMenuOps = append(utilityMenuOps, []*MenuOption{
+			{text: "copy to clipboard", operation: &CBCopyOp{}},
+			{text: "paste from clipboard", operation: &CBPasteOp{}},
+		}...)
+	}
+	utilityMenuOps = append(utilityMenuOps, []*MenuOption{
 		{text: "(un)lock order", operation: &LockOrderOp{}},
 		{text: "delete all", operation: &DeleteAllOp{}},
-	}
+	}...)
 	utilityMenu := NewMenu(utilityMenuOps, ebiten.MouseButtonLeft)
 	options := []*MenuOption{
 		RepeatMenuOption(ui.lastOp),
@@ -37,7 +45,9 @@ func MainMenu(ui *UI) *Menu {
 		{text: "copy", operation: &CopyOp{}},
 		{text: "crop", operation: &CropOp{}},
 		{text: "cut", operation: &CutOp{}},
+		{text: "rotate", operation: &RotateOp{}},
 		{text: "reshape", operation: &ReshapeOp{}},
+		{text: "carve", operation: &CarveOp{}},
 		{text: "flatten", operation: &FlattenOp{}},
 		{text: "opacity", operation: &OpacityOp{}},
 		{text: "delete", operation: &DeleteOp{}},

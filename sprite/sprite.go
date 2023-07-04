@@ -101,6 +101,10 @@ func (s *Sprite) Crop(r image.Rectangle) *Sprite {
 	}
 }
 
+func (s *Sprite) Rotate90() {
+	s.Image = draw.RotateImage(s.Image)
+}
+
 func (s Sprite) Outline(dst *ebiten.Image, clr color.Color, strokeWidth, offset float32) {
 	draw.StrokeRect(dst, s.Rect(), clr, strokeWidth, offset)
 }

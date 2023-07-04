@@ -4,18 +4,11 @@ import (
 	"image"
 	_ "image/gif"
 	_ "image/jpeg"
-	_ "image/png"
 	"io/fs"
-	"log"
 
 	_ "golang.org/x/image/webp"
 
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/inpututil"
-
-	"bytes"
-
-	"golang.design/x/clipboard"
 )
 
 func (ui *UI) handleDroppedFiles() error {
@@ -39,7 +32,7 @@ func (ui *UI) handleDroppedFiles() error {
 				if err != nil {
 					return err
 				}
-				log.Printf("Name: %s, Size: %d, IsDir: %t, ModTime: %v", fi.Name(), fi.Size(), fi.IsDir(), fi.ModTime())
+				// log.Printf("Name: %s, Size: %d, IsDir: %t, ModTime: %v", fi.Name(), fi.Size(), fi.IsDir(), fi.ModTime())
 
 				f, err := files.Open(path)
 				if err != nil {
@@ -74,37 +67,4 @@ func (ui *UI) handleDroppedFiles() error {
 		}()
 	}
 	return nil
-}
-
-var clipboardEnabled bool
-
-func (ui *UI) handlePaste() error {
-	if !clipboardEnabled {
-		return nil
-	}
-	if !inpututil.IsKeyJustPressed(ebiten.KeyV) || !ebiten.IsKeyPressed(ebiten.KeyControl) {
-		return nil
-	}
-	b := clipboard.Read(clipboard.FmtImage)
-	if b == nil {
-		return nil
-	}
-	img, _, err := image.Decode(bytes.NewReader(b))
-	if err != nil {
-		return err
-	}
-	if img == nil {
-		return nil
-	}
-	ui.Canvas.AddImage(img)
-	return nil
-}
-
-func init() {
-	log.Println("clipboard init")
-	err := clipboard.Init()
-	if err != nil {
-		log.Println("no clipboard", err)
-	}
-	clipboardEnabled = true
 }

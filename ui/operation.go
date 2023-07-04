@@ -10,6 +10,7 @@ import (
 	"frame/canvas"
 	"frame/draw"
 	"frame/sprite"
+	"frame/ui/clipboard"
 )
 
 type Operation interface {
@@ -49,6 +50,10 @@ func CopyOperation(op Operation) Operation {
 		return &CopyOp{}
 	case *CutOp:
 		return &CutOp{}
+	case *CarveOp:
+		return &CarveOp{}
+	case *RotateOp:
+		return &RotateOp{}
 	}
 	return nil
 }
@@ -402,9 +407,10 @@ func (op *FlattenOp) Update(ui *UI) (done bool, err error) {
 		}
 		op.done = true
 		if !op.drag.Moved() {
-			return true, nil
+			op.rect = ui.Canvas.Image().Bounds()
+		} else {
+			op.rect = op.drag.Rect()
 		}
-		op.rect = op.drag.Rect()
 	}
 	if op.spr == nil {
 		op.spr = ui.Canvas.NewSpriteFromRegion(op.rect)
@@ -669,4 +675,89 @@ func (op *OpacityOp) FullDraw(dst *ebiten.Image, c *canvas.Canvas) {
 		sp := op.Targets[i]
 		sp.Draw(dst, image.Point{0, 0}, 1+op.opacityOffset)
 	}
+}
+
+type CBCopyOp struct {
+	flattenOp *FlattenOp
+}
+
+func (op *CBCopyOp) String() string { return "copy region to clipboard" }
+
+func (op *CBCopyOp) Update(ui *UI) (done bool, err error) {
+	if !clipboard.Enabled {
+		// add error
+		return true, nil
+	}
+	if op.flattenOp == nil {
+		op.flattenOp = &FlattenOp{}
+		ui.addOperation(op.flattenOp)
+		return false, nil
+	}
+	if op.flattenOp.spr == nil {
+		return false, nil
+	}
+	ui.RemoveSprite(op.flattenOp.spr)
+	return true, clipboard.Copy(op.flattenOp.spr.Image)
+}
+
+type CBPasteOp struct {
+	spr    *sprite.Sprite
+	setPos bool
+}
+
+func (op *CBPasteOp) String() string { return "paste from clipboard" }
+
+func (op *CBPasteOp) Update(ui *UI) (done bool, err error) {
+	if !clipboard.Enabled {
+		// add error
+		return true, nil
+	}
+	if op.spr == nil {
+		op.spr, err = clipboard.Paste()
+		if err != nil || op.spr == nil {
+			return true, err
+		}
+		ui.AddSprite(op.spr)
+	}
+	op.spr.Pos = MousePos()
+	if op.setPos || MouseJustPressed(ebiten.MouseButtonLeft) {
+		return true, nil
+	}
+	return false, nil
+}
+
+func (op *CBPasteOp) Draw(dst *ebiten.Image) {
+	if op.spr == nil {
+		return
+	}
+	op.spr.Draw(dst, image.Point{}, 1)
+}
+
+type RotateOp struct {
+	selOp  *SelectSpriteOp
+	target *sprite.Sprite
+	clr    color.Color
+}
+
+func (op RotateOp) String() string { return "rotate 90" }
+
+func (op *RotateOp) Update(ui *UI) (done bool, err error) {
+	if op.clr == nil {
+		op.clr = color.Black
+	}
+	if op.target == nil {
+		if op.selOp == nil {
+			op.selOp = &SelectSpriteOp{clr: op.clr}
+			ui.addOperation(op.selOp)
+		}
+		if !op.selOp.done {
+			return false, nil
+		}
+		if op.selOp.target == nil {
+			return true, nil
+		}
+		op.target = op.selOp.target
+	}
+	op.target.Rotate90()
+	return true, nil
 }
