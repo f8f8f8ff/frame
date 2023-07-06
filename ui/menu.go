@@ -35,6 +35,7 @@ func MainMenu(ui *UI) *Menu {
 		}...)
 	}
 	utilityMenuOps = append(utilityMenuOps, []*MenuOption{
+		carveToggleMenuOp(),
 		{text: "(un)lock order", operation: &LockOrderOp{}},
 		{text: "delete all", operation: &DeleteAllOp{}},
 	}...)

@@ -13,6 +13,12 @@ import (
 	"carve"
 )
 
+func init() {
+	carve.StepRatio = 0.5
+	carve.StepCap = 500
+	carve.SobelInternal = false
+}
+
 type CarveOp struct {
 	sprOrRect *SelectSpriteRectOp
 	dstDrag   MouseDrag
@@ -130,4 +136,24 @@ func (op *CarveProgress) Draw(dst *ebiten.Image) {
 	r := image.Rect(dr.Min.X, dr.Min.Y, x1, dr.Min.Y+5)
 	draw.FillRect(dst, r, color.RGBA{0, 0, 255, 128})
 	draw.StrokeRect(dst, dr, op.clr, 1, -1)
+}
+
+func carveToggleMenuOp() *MenuOption {
+	var txt string = ""
+	if carve.SobelInternal {
+		txt = "change carve type to blocky"
+	} else {
+		txt = "change carve type to smooth"
+	}
+	return &MenuOption{
+		text:      txt,
+		operation: &CarveToggleEnergyMethod{},
+	}
+}
+
+type CarveToggleEnergyMethod struct{}
+
+func (op *CarveToggleEnergyMethod) Update(ui *UI) (bool, error) {
+	carve.SobelInternal = !carve.SobelInternal
+	return true, nil
 }
