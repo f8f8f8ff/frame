@@ -91,9 +91,14 @@ type Menu struct {
 	startPressed *bool
 	result       Operation
 	screensize   image.Point
+	ogMousePos   *image.Point
 }
 
 func (m *Menu) Update(ui *UI) (done bool, err error) {
+	if m.ogMousePos == nil {
+		m.ogMousePos = &image.Point{}
+		*(m.ogMousePos) = MousePos()
+	}
 	if m.rect == nil {
 		m.rect = &image.Rectangle{}
 		m.rect.Min = MousePos()
@@ -109,9 +114,18 @@ func (m *Menu) Update(ui *UI) (done bool, err error) {
 		m.createOptionSprites()
 		return false, nil
 	}
-	if *m.startPressed && !MouseJustReleased(m.mouseButton) {
+	if *m.startPressed && !EitherMouseJustReleased() {
 		return false, nil
-	} else if !*m.startPressed && !MouseJustPressed(m.mouseButton) {
+	} else if !*m.startPressed && !EitherMouseJustPressed() {
+		return false, nil
+	}
+	var moved bool
+	md := m.ogMousePos.Sub(MousePos())
+	if abs(md.X) > 3 || abs(md.Y) > 3 {
+		moved = true
+	}
+	if !moved && (MouseJustPressed(m.mouseButton) || MouseJustReleased(m.mouseButton)) {
+		*m.startPressed = !*m.startPressed
 		return false, nil
 	}
 	for _, opt := range m.options {
@@ -121,6 +135,13 @@ func (m *Menu) Update(ui *UI) (done bool, err error) {
 		}
 	}
 	return true, nil
+}
+
+func abs(x int) int {
+	if x < 0 {
+		return -x
+	}
+	return x
 }
 
 func (m *Menu) createOptionSprites() {

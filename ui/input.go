@@ -83,6 +83,14 @@ func MouseJustPressed(button ebiten.MouseButton) bool {
 func MouseJustReleased(button ebiten.MouseButton) bool {
 	return inpututil.IsMouseButtonJustReleased(button)
 }
+func EitherMouseJustPressed() bool {
+	return MouseJustPressed(ebiten.MouseButtonLeft) ||
+		MouseJustPressed(ebiten.MouseButtonRight)
+}
+func EitherMouseJustReleased() bool {
+	return MouseJustReleased(ebiten.MouseButtonLeft) ||
+		MouseJustReleased(ebiten.MouseButtonRight)
+}
 
 func CancelInput() bool {
 	if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonRight) {
